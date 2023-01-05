@@ -1,0 +1,39 @@
+body {
+  font-family: sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+label {
+  display: block;
+}
+
+nav a {
+  display: inline-block;
+  margin: 1em;
+}
+
+form div {
+  margin: 1em;
+  display: inline-block;
+}
+
+.gameBoard {
+  position:relative; left:0%; top:5%;
+  width: 80vw; height: 60vh;
+}
+
+.bin{ position: absolute; width: 10%; height:26%; 
+  background-color:yellow; border-radius:10px;
+  text-align:center; 
+}
+
+.homeBase { position:absolute; width:10%; 
+  height:56%; background-color:orange;
+  border-radius:10px;
+  text-align:center; 
+}
+
+.playerData { max-height:20vh; overflow:auto }
