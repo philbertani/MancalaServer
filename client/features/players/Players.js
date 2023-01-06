@@ -94,8 +94,6 @@ const Players = (props) => {
       }
     }
 
-    //<p key={playerName}>{playerName} {heartbeat} {timeDiff} {JSON.stringify(value)} {disconnectedMessage}</p>
-
     let gameRequestOutput = []
     let activeGameOutput = []
 
@@ -153,7 +151,14 @@ const Players = (props) => {
       }
     }
 
-    activeGameOutput.push(<Play key='mainPlay' setRequested={setRequested} loggedInPlayers={loggedInPlayers} playerName={playerName} />)   
+    activeGameOutput.push(
+      <Play
+        key="mainPlay"
+        setRequested={setRequested}
+        loggedInPlayers={loggedInPlayers}
+        playerName={playerName}
+      />
+    );   
 
     return ( [
       <div key='playerList'>

@@ -1,5 +1,7 @@
 import React, {useEffect,  useRef, useState} from "react";
 import { useDispatch } from "react-redux";
+import * as THREE from "three"
+import GPU from  "./GPU"
 
 import { executeTurn, endGame } from "../players/playersSlice";
 
@@ -15,7 +17,9 @@ const nextBin = [
   [ 8, 0, 1, 2, 3, 4, 5, -1, 9, 10, 11, 12, 13, 6], //P0 skips hb1
   [-1, 8, 1, 2, 3, 4, 5,  6, 9, 10, 11, 12, 13, 7]  //P1 skips hb0
 ]
-let initialStones = Array(14).fill(1);
+
+const initStonesPerBin = 1
+let initialStones = Array(14).fill(initStonesPerBin);
 initialStones[0] = 0;
 initialStones[7] = 0;
 
@@ -33,6 +37,7 @@ const Play = (props) => {
   const { playerName, loggedInPlayers } = props;
   const [gameOutput, setGameOutput] = useState([])
   const [gameBoard, setGameBoard] = useState([])
+
 
   const gameBoardRef = useRef()
 
@@ -86,7 +91,7 @@ const Play = (props) => {
           }
         }
   
-        const bgcolors = ['purple','yellow']
+        const bgcolors = ['rgba(150,0,150,.5)','(255,255,0,.5']
         const colors = ['yellow','purple']
 
         const playingGame = activeGame ? (activeGame.gameState=='playing' || activeGame.gameState=='winner') : false 
@@ -166,23 +171,33 @@ const Play = (props) => {
             }
           }
   
-          //const {gameState, winnerInfo} = loggedInPlayers[playerName].activeGame
           const {gameState, winnerInfo} = gameToDisplay
-          newGameBoard.push( [
-            <div key="winnerDiv">{gameState} {JSON.stringify(winnerInfo)} </div>,
-            <div 
+          newGameBoard.push([
+            <div style={{ position: "relative", top: "0%" }} key="winnerDiv">
+              {gameState} {JSON.stringify(winnerInfo)}{" "}
+            </div>,
+            <div
               ref={gameBoardRef}
-              onClick = { (gameState!=='winner') 
-                ? (ev)=>{dispatchExecuteTurn(ev,gameToDisplay.id,myTurn,gameState)} : undefined }
-  
+              onClick={
+                gameState !== "winner"
+                  ? (ev) => {
+                      dispatchExecuteTurn(
+                        ev,
+                        gameToDisplay.id,
+                        myTurn,
+                        gameState
+                      );
+                    }
+                  : undefined
+              }
               key="gameBoard"
               className="gameBoard"
             >
               {binOutput}
-            </div>
-          ])
-          
-          setGameBoard(newGameBoard)
+            </div>,
+          ]);
+
+          setGameBoard(newGameBoard);
         }
   
       }
@@ -205,11 +220,22 @@ const Play = (props) => {
     }
   };
 
-  return [
-    <div key="gameDiv">{gameOutput}</div>,
+  const canvasRef = useRef()
+  const labelsRef = useRef()
+  const GPUcontainerRef = useRef()
 
-    <div key="gameContainer">{gameBoard}</div>
-    
+  return [
+
+    <div key="gameDiv">{gameOutput}</div>,
+    <div key="gameContainer">{gameBoard}</div>,
+
+    <div key="GPU-Div" id="canvas" ref={canvasRef} >
+        <GPU key="GPU" 
+          canvasRef={canvasRef}
+          binRefs={binRefs}
+        />
+    </div>,
+
   ];
 
 };
