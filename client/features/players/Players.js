@@ -68,7 +68,7 @@ const Players = (props) => {
 
       //if the challenger already has an activeGame object don't change status of other
       //opponents
-      const challengerCheck = loggedInPlayers[playerName].hasOwnProperty('activeGame') 
+      //const challengerCheck = loggedInPlayers[playerName].hasOwnProperty('activeGame') 
 
       //if someone gets disconnected we need the following:
       const acceptedCheck = (loggedInPlayers[playerName].challengeStatus || false)

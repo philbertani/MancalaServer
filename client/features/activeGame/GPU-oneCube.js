@@ -1,12 +1,9 @@
 import React, { useState, useEffect} from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { d12Vertices, d4Vertices } from "./geometry"
 
 //https://r105.threejsfundamentals.org/threejs/lessons/threejs-align-html-elements-to-3d.html
 let cubes = []
-let isRendering = false
-let count = 0
 
 //GPU (any high end graphics like canvas or WebGL/Three.js goes here)
 const GPU = (props) => {
@@ -15,7 +12,6 @@ const GPU = (props) => {
   const [binsInitialized, setBinsInitialized] = useState(false)
   const [GL, setGL] = useState({})
   const [windowSize,setWindowSize] = useState({})
-  const [prevStones,setPrevStones] = useState()
 
   const {canvasRef, gameToDisplay, binRefs} = props
 
@@ -40,9 +36,6 @@ const GPU = (props) => {
   useEffect(() => {
 
     let frameId  //need to save it
-    const stones = gameToDisplay.boardConfig.stones
-
-    //console.log('zzzzzzzzzzz',stones[1])
 
     if (canvasRef.current && !canvasInitialized) {
   
@@ -76,9 +69,9 @@ const GPU = (props) => {
         scene.add(light);
       }
     
-      const boxWidth = .25;
-      const boxHeight = .25;
-      const boxDepth = .25;
+      const boxWidth = .3;
+      const boxHeight = .3;
+      const boxDepth = .3;
       const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
     
       const labelContainerElem = document.createElement('div')
@@ -100,28 +93,6 @@ const GPU = (props) => {
         return {cube, elem};
       }
     
-      const material = new THREE.MeshPhongMaterial();
-      function makeD4Instance(geometry,color,x,y,z,name,binNum) {
-        const d4Group = new THREE.Group()
-        for (let i=0; i<d4Vertices.length; i++) {
-          const cube = new THREE.Mesh(geometry,material)
-          cube.material.color.setHex(color)
-          const [x2,y2,z2] = d4Vertices[i]
-          cube.position.set(x2,y2,z2).multiplyScalar(.2)
-          d4Group.add(cube)
-        }   
-
-        d4Group.position.set(x,y,z)
-        const elem = document.createElement('div');
-        elem.textContent = name;
-        elem.binNum = binNum;
-        labelContainerElem.appendChild(elem);
-
-        scene.add(d4Group)
-
-        return {cube:d4Group, elem}
-      }
-
       if ( gameToDisplay.boardConfig) {
         console.log('boardConfig exists')
       }
@@ -129,26 +100,33 @@ const GPU = (props) => {
         console.log('no boardConfig')
       }
 
+      /* 
+      const cubesx = [
+        makeInstance(geometry, 0x44aa88,  0, 'Aqua'),
+        makeInstance(geometry, 0x8844aa, -2, 'Purple'),
+        makeInstance(geometry, 0xaa8844,  2, 'Gold'),
+      ]; 
+      */
+
       const cubes = mancalaCubes( )
       function mancalaCubes() {
         console.log('zzzzzzzzzzz running mancalaCubes')
         let cubes = []
 
-        if ( !gameToDisplay.boardConfig) return cubes   //should not happen
+        if ( !gameToDisplay.boardConfig) return cubes
 
-        //const stones = gameToDisplay.boardConfig.stones
-
+        const stones = gameToDisplay.boardConfig.stones
         const p0bins = gameToDisplay.boardConfig.playerBins[0]
         let pos=0
         for ( let i=p0bins[0]; i<=p0bins[1]; i++ ) {  //i is binNum
-          cubes.push(makeD4Instance(geometry,0xF000F0,2*(pos-3),1,-.5,String(stones[i]),i))
+          cubes.push(makeInstance(geometry,0xF000F0,pos-3,1,-.5,String(stones[i]),i))
           pos ++
         }
 
         const p1bins = gameToDisplay.boardConfig.playerBins[1]
         pos = 0
         for ( let i=p1bins[0]; i<=p1bins[1]; i++ ) {  //i is binNum
-          cubes.push(makeD4Instance(geometry,0xF000F0,2*(pos-3),-1,0,String(stones[i]),i))
+          cubes.push(makeInstance(geometry,0xF000F0,pos-3,-1,0,String(stones[i]),i))
           pos ++
         }
         return cubes
@@ -164,25 +142,19 @@ const GPU = (props) => {
     if ( canvasInitialized) {
 
       const {renderer,camera,scene,cubes} = GL
+
       const tempV = new THREE.Vector3();
-      
+      const raycaster = new THREE.Raycaster();
+    
       function render(time) {
 
-        count ++
-        if (count%5000 == 0) console.log('hhhhhhhh',count)
-        const currentRenderTime = Date.now()
-        const elapsed = currentRenderTime - prevRenderTime
-
-        //if ( elapsed < fpsInterval ) return;
-
-        //console.log('rendering', elapsed)
+        //console.log(window.innerWidth)
         time *= 0.001;
-        prevRenderTime = currentRenderTime - (elapsed%fpsInterval)
-
-        //console.log('xxxxx',stones[1])
+        
         cubes.forEach((cubeInfo, ndx) => {
 
-          //const stones = gameToDisplay.boardConfig.stones
+          const stones = gameToDisplay.boardConfig.stones
+
           const {cube, elem} = cubeInfo;
           const { binNum } = elem
 
@@ -202,40 +174,41 @@ const GPU = (props) => {
           // on the left and y = -1 being on the bottom
           tempV.project(camera);
     
-          elem.style.display = '';
+          // ask the raycaster for all the objects that intersect
+          // from the eye toward this object's position
+          raycaster.setFromCamera(tempV, camera);
+          const intersectedObjects = raycaster.intersectObjects(scene.children);
+          // We're visible if the first intersection is this object.
+          const show = intersectedObjects.length && cube === intersectedObjects[0].object;
     
-          // convert the normalized position to CSS coordinates
-          const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
-          const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
+          if (!show || Math.abs(tempV.z) > 1) {
+            // hide the label
+            elem.style.display = 'none';
+          } else {
+            // unhide the label
+            elem.style.display = '';
     
-          // move the elem to that position
-          elem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+            // convert the normalized position to CSS coordinates
+            const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
+            const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
     
-          // set the zIndex for sorting
-          elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
-          
+            // move the elem to that position
+            elem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+    
+            // set the zIndex for sorting
+            elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
+          }
         });
-
+    
         renderer.render(scene, camera);
         frameId = requestAnimationFrame(render);
 
       }
 
-            //we need to throttle the fps to maintain game speed
-      //too much else going on with React and Express
-      const fps = 1
-      const fpsInterval = 1000/fps
-      let prevRenderTime = Date.now()
-    
-      let newStoneConfig = false
-      for (let i=0; i< stones.length; i++) {
-        if ( stones[i] !== prevStones[i]) {
-          newStoneConfig = true
-        }
-      }
-
-      console.log('wtf')
+      //requestAnimationFrame(render);
       render()
+
+      //console.log('should not be here that often')
 
     }
 
@@ -243,9 +216,8 @@ const GPU = (props) => {
     //return () => { if ( frameId ) window.cancelAnimationFrame(frameId)}
 
     //console.log('zzzzzz',gameToDisplay.boardConfig.stones)
-    setPrevStones(stones)
 
-  },[gameToDisplay.boardConfig.stones]);
+  },[gameToDisplay]);
 
 }
 

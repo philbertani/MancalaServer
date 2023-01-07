@@ -37,7 +37,7 @@ const Play = (props) => {
   const { playerName, loggedInPlayers } = props;
   const [gameOutput, setGameOutput] = useState([])
   const [gameBoard, setGameBoard] = useState([])
-
+  const [gameForGPU,setGameForGPU] = useState({})
 
   const gameBoardRef = useRef()
 
@@ -50,6 +50,7 @@ const Play = (props) => {
   useEffect(() => {
  
     if (loggedInPlayers && loggedInPlayers[playerName] && loggedInPlayers[playerName].activeGame) {   
+
       const { id, gameState, winnerInfo } =
         loggedInPlayers[playerName].activeGame;
 
@@ -114,6 +115,7 @@ const Play = (props) => {
           //got into this loop
           const stones = gameToDisplay.boardConfig.hasOwnProperty('stones') ? gameToDisplay.boardConfig.stones : [...initialStones]
   
+          setGameForGPU(gameToDisplay)
           //console.log('zzzzzzzzzz',playingGame, stones)
 
           let binOutput = []
@@ -229,11 +231,15 @@ const Play = (props) => {
     <div key="gameDiv">{gameOutput}</div>,
     <div key="gameContainer">{gameBoard}</div>,
 
+    
     <div key="GPU-Div" id="canvas" ref={canvasRef} >
+      {gameForGPU.boardConfig &&
         <GPU key="GPU" 
+          gameToDisplay={gameForGPU || null}
           canvasRef={canvasRef}
           binRefs={binRefs}
         />
+      }
     </div>,
 
   ];
