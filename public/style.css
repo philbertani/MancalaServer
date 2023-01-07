@@ -62,12 +62,17 @@ form div {
   color: white;
 }
 #labels>div {
+  background-color: rgba(0,0,0,0);
+  border-radius: 10px;
+  width: 80px;
+  height: 80px;
+  text-align: center;
   white-space: nowrap;
   position: absolute;  /* let us position them inside the container */
   left: 0;             /* make their default position the top left of the container */
   top: 0;
   cursor: pointer;     /* change the cursor to a hand when over us */
-  font-size: large;
+  font-size:x-large;
   user-select: none;   /* don't let the text get selected */
   text-shadow:         /* create a black outline */
   -1px -1px 0 #000,

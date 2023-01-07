@@ -187,6 +187,7 @@ const Play = (props) => {
                         ev,
                         gameToDisplay.id,
                         myTurn,
+                        myBins,
                         gameState
                       );
                     }
@@ -207,12 +208,12 @@ const Play = (props) => {
 
   },[loggedInPlayers]);  //loggedInPlayers gets updated by setInterval from parent: Players
 
-  const dispatchExecuteTurn = (ev, gameId, myTurn, gameState) => {
+  const dispatchExecuteTurn = (ev, gameId, myTurn, myBins, gameState) => {
     if (ev && gameId && myTurn && gameState!=='winner') {
       //console.log(ev.clientX, gameId, myTurn, ev.target);
       if (myTurn && String(ev.target.id).includes('bin')  ) {
         const binNum = String(ev.target.id).replace(/bin/,'')
-        const {myBins} = loggedInPlayers[playerName]
+        //const {myBins} = loggedInPlayers[playerName]
 
         //only dispatch if we are in the range of bins for this player
         if ( binNum >= myBins[0] && binNum <= myBins[1]) {
@@ -234,8 +235,10 @@ const Play = (props) => {
     
     <div key="GPU-Div" id="canvas" ref={canvasRef} >
       {gameForGPU.boardConfig &&
-        <GPU key="GPU" 
-          gameToDisplay={gameForGPU || null}
+        <GPU key="GPU"
+          dispatchExecuteTurn={dispatchExecuteTurn}
+          playerData={loggedInPlayers[playerName]} 
+          gameToDisplay={gameForGPU}
           canvasRef={canvasRef}
           binRefs={binRefs}
         />

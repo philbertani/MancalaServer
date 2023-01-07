@@ -2,6 +2,7 @@ import React, { useState, useEffect} from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { d12Vertices, d4Vertices } from "./geometry"
+import { executeTurn, endGame } from "../players/playersSlice";
 
 //https://r105.threejsfundamentals.org/threejs/lessons/threejs-align-html-elements-to-3d.html
 let cubes = []
@@ -17,7 +18,13 @@ const GPU = (props) => {
   const [windowSize,setWindowSize] = useState({})
   const [prevStones,setPrevStones] = useState()
 
-  const {canvasRef, gameToDisplay, binRefs} = props
+  const { 
+    canvasRef, 
+    gameToDisplay,
+    playerData, 
+    dispatchExecuteTurn,
+    binRefs
+  } = props
 
   //this will fire every time window size changes
   React.useEffect(() => {
@@ -52,15 +59,15 @@ const GPU = (props) => {
       const renderer = new THREE.WebGLRenderer({antialias:true});
     
       renderer.setSize(window.innerWidth,window.innerHeight/2)
-      renderer.setClearColor("yellow", .5);
+      renderer.setClearColor("orange", 1);
       canvas.appendChild(renderer.domElement)
 
-      const fov = 80;
+      const fov = 50;
       const aspect = window.innerWidth/window.innerHeight;  // the canvas default
       const near = .1;
       const far = 2000;
       const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-      camera.position.z = 3;
+      camera.position.z = 5;
     
       const controls = new OrbitControls(camera, canvas);
       controls.target.set(0, 0, 0);
@@ -68,13 +75,16 @@ const GPU = (props) => {
     
       const scene = new THREE.Scene();
     
-      {
-        const color = 0xFFFFFF;
-        const intensity = 1;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(-1, 2, 4);
-        scene.add(light);
-      }
+      const color = 0xFFFFFF;
+      const intensity = 1;
+
+      //const light = new THREE.DirectionalLight(color, intensity);
+      //light.position.set(-1, 2, 4);
+
+      //super cool - light source now emanates from camera!
+      const light = new THREE.PointLight(color,intensity)
+      scene.add(camera);
+      camera.add(light)
     
       const boxWidth = .25;
       const boxHeight = .25;
@@ -99,7 +109,13 @@ const GPU = (props) => {
     
         return {cube, elem};
       }
-    
+      
+      //probably should be passing all this junk in props
+      const {myTurn,activeGame} = playerData
+      const hasActiveGame =  activeGame && activeGame.hasOwnProperty('display') && activeGame.display 
+      const {gameState} = gameToDisplay
+      const myBins = hasActiveGame ? playerData.myBins : [0,14]
+
       const material = new THREE.MeshPhongMaterial();
       function makeD4Instance(geometry,color,x,y,z,name,binNum) {
         const d4Group = new THREE.Group()
@@ -115,6 +131,7 @@ const GPU = (props) => {
         const elem = document.createElement('div');
         elem.textContent = name;
         elem.binNum = binNum;
+        //elem.onclick = (ev) => {dispatchExecuteTurn(ev,gameToDisplay.id,myTurn,gameState)}
         labelContainerElem.appendChild(elem);
 
         scene.add(d4Group)
@@ -168,6 +185,7 @@ const GPU = (props) => {
       
       function render(time) {
 
+        //we are rendering way too many times a second
         count ++
         if (count%5000 == 0) console.log('hhhhhhhh',count)
         const currentRenderTime = Date.now()
@@ -223,7 +241,7 @@ const GPU = (props) => {
 
             //we need to throttle the fps to maintain game speed
       //too much else going on with React and Express
-      const fps = 1
+      const fps = 2
       const fpsInterval = 1000/fps
       let prevRenderTime = Date.now()
     
