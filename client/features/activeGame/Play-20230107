@@ -212,13 +212,11 @@ const Play = (props) => {
     if (ev && gameId && myTurn && gameState!=='winner') {
       //console.log(ev.clientX, gameId, myTurn, ev.target);
       if (myTurn && String(ev.target.id).includes('bin')  ) {
-        const  binNum = String(ev.target.id).replace(/bin/,'')
-        const binNumFinal = String(binNum).replace(/GPUNum/,'')
-
+        const binNum = String(ev.target.id).replace(/bin/,'')
         //const {myBins} = loggedInPlayers[playerName]
-        //console.log('uuuuuuuuuuuuuuuuu fuuuuuuuuuckkkk',ev.target.id,binNum,binNumFinal,myBins)
+
         //only dispatch if we are in the range of bins for this player
-        if ( binNumFinal >= myBins[0] && binNumFinal <= myBins[1]) {
+        if ( binNum >= myBins[0] && binNum <= myBins[1]) {
           dispatch(executeTurn({playerName,binNum}));
         }
       }
@@ -236,7 +234,7 @@ const Play = (props) => {
     <div key="gameDiv">{gameOutput}</div>,
     <div key="gameContainer">{gameBoard}</div>,
 
-    <div key="GPUdiv" >
+    <div key="GPUdiv" id="canvas" ref={canvasRef}>
       {gameForGPU.boardConfig && [
         <GPU key="GPU"
           dispatchExecuteTurn={dispatchExecuteTurn}

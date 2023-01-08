@@ -41,10 +41,10 @@ form div {
 .playerData { max-height:20vh; overflow:auto }
 
 #canvas {
-  position: relative;
   width: 100%;  /* let our container decide our size */
   height: 100%;
   display: block;
+  z-Index:-1e7;
 }
 
 #GPUcontainer {
@@ -55,7 +55,7 @@ form div {
 }
 
 #labels {
-  position: absolute;  /* let us position ourself inside the container */
+  position: relative;  /* let us position ourself inside the container */
   z-index: 0;          /* make a new stacking context so children don't sort with rest of page */
   left: 0;             /* make our position the top left of the container */
   top: 0;

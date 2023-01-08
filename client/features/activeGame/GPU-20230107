@@ -5,9 +5,9 @@ import { d12Vertices, d4Vertices } from "./geometry"
 import { executeTurn, endGame } from "../players/playersSlice";
 
 //https://r105.threejsfundamentals.org/threejs/lessons/threejs-align-html-elements-to-3d.html
-//let cubes = []
-//let isRendering = false
-let count = 0  //useRef() replaces all this kind of stuff
+let cubes = []
+let isRendering = false
+let count = 0
 
 //GPU (any high end graphics like canvas or WebGL/Three.js goes here)
 const GPU = (props) => {
@@ -33,14 +33,10 @@ const GPU = (props) => {
     const labelRef = useRef()
     labelRefs.push(labelRef)
   }
-  const stonesRef = useRef()
-  const frameIdRef = useRef()
-  const isRendering = useRef(false)
 
   React.useEffect(() => {
     window.addEventListener("click",(ev)=>{console.log('mouse click',ev)})
   },[])
-
   //this will fire every time window size changes
   React.useEffect(() => {
     window.addEventListener("resize", () => {
@@ -61,9 +57,8 @@ const GPU = (props) => {
 
   useEffect(() => {
 
+    let frameId  //need to save it
     const stones = gameToDisplay.boardConfig.stones
-
-    stonesRef.current = stones
 
     //console.log('zzzzzzzzzzz',stones[1])
 
@@ -149,11 +144,9 @@ const GPU = (props) => {
         }   
 
         d4Group.position.set(x,y,z)
-
-        //const elem = document.createElement('div');
-        //elem.textContent = name;
-        //elem.binNum = binNum;
-        const elem = binNum
+        const elem = document.createElement('div');
+        elem.textContent = name;
+        elem.binNum = binNum;
 
         //labelContainerElem.appendChild(elem);
 
@@ -161,8 +154,7 @@ const GPU = (props) => {
           <div 
             key={"label"+binNum} 
             ref={labelRefs[binNum]}
-            id={"GPUbinNum" + binNum }
-            onClick={(ev)=>{dispatchExecuteTurn(ev,gameToDisplay.id,myTurn,myBins,gameState)}  }    
+           
           >{stones[binNum]}</div>)
 
         scene.add(d4Group)
@@ -213,16 +205,6 @@ const GPU = (props) => {
       setCanvasInitialized(true)
     }
 
-    let newStoneConfig = false;
-    if (prevStones) {
-      for (let i = 0; i < stones.length; i++) {
-        if (stones[i] !== prevStones[i]) {
-          newStoneConfig = true;
-          //console.log("someone apparently has made a move");
-        }
-      }
-    }
-
     if ( canvasInitialized) {
 
       const {renderer,camera,scene,cubes} = GL
@@ -230,15 +212,24 @@ const GPU = (props) => {
       
       //we need to throttle the fps to maintain game speed
       //too much else going on with React and Express
-      const fps = 32
+      const fps = 20
       const fpsInterval = 1000/fps
       let prevRenderTime = Date.now()
     
+      let newStoneConfig = false
+      for (let i=0; i< stones.length; i++) {
+        if ( stones[i] !== prevStones[i]) {
+          newStoneConfig = true
+          console.log('someone apparently has made a move')
+          console.log(stones)
+        }
+      }
+
       // https://stackoverflow.com/questions/62653091/cancelling-requestanimationrequest-in-a-react-component-using-hooks-doesnt-work
 
       function render(time) {
 
-        frameIdRef.current = requestAnimationFrame(render);
+        frameId = requestAnimationFrame(render);
         //we are rendering way too many times a second
 
         //if (count%60 == 0) console.log('hhhhhhhh',count)
@@ -257,7 +248,9 @@ const GPU = (props) => {
 
           //const stones = gameToDisplay.boardConfig.stones
           const {cube, elem} = cubeInfo;
-          const  binNum  = elem
+          const { binNum } = elem
+
+          elem.textContent = String(stones[binNum])  //so we get updates from the game
 
           const speed = 1 + ndx * .1;
           const rot = time * speed;
@@ -272,27 +265,26 @@ const GPU = (props) => {
           // x and y will be in the -1 to +1 range with x = -1 being
           // on the left and y = -1 being on the bottom
           tempV.project(camera);
-   
+    
+          elem.style.display = '';
+    
           // convert the normalized position to CSS coordinates
           const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
           const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
     
-          //unhide
-          //elem.style.display = '';
           // move the elem to that position
-          //elem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+          elem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
           // set the zIndex for sorting
-          //elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
-   
-          //the key to getting the updated version of stones is the use
-          //stonesRef which is maintained by useRef()!!!
-          //can't escape the React life cycle - just accept it
+          elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
+          elem.id = binNum
+
           const labelRef = labelRefs[binNum]
           if (labelRef.current) {
-            labelRef.current.textContent = String(stonesRef.current[binNum])
-            //numbers are a little choppy put in some smoothing
+            labelRef.current.textContent = String(stones[binNum])
             labelRef.current.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
             labelRef.current.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
+            labelRef.current.id = binNum
+            labelRef.onclick = "console.log('shit')"
           }
 
         });
@@ -301,16 +293,17 @@ const GPU = (props) => {
 
       }
 
-      if ( !isRendering.current) {
+      //console.log('wtf')
+      if ( !isRendering) {
         console.log('kicking off recursive render')
-        isRendering.current = true
+        isRendering = true
         render()
       }
 
     }
 
     //console.log('running initial',gameToDisplay )
-    //return () => { if ( frameIdRef.current ) window.cancelAnimationFrame(frameIdRef.current)}
+    //return () => { if ( frameId ) window.cancelAnimationFrame(frameId)}
 
     //console.log('zzzzzz',gameToDisplay.boardConfig.stones)
     setPrevStones(stones)
@@ -326,6 +319,5 @@ const GPU = (props) => {
   ])
 
 }
-
 
 export default GPU
