@@ -22,7 +22,9 @@ const GPU = (props) => {
   const { 
     canvasRef, 
     gameToDisplay,
-    playerData, 
+    playerData,
+    playerNum,
+    myTurn,
     dispatchExecuteTurn,
     labelsRef,
     binRefs
@@ -33,13 +35,34 @@ const GPU = (props) => {
     const labelRef = useRef()
     labelRefs.push(labelRef)
   }
+
+  //to access the LATEST values of variables in functions defined within Components
+  //we need to access a reference!!!  - don't fight the system
   const stonesRef = useRef()
   const frameIdRef = useRef()
   const isRendering = useRef(false)
+  const playerNumRef = useRef()
+  const playerDataRef = useRef()
+  const gameToDisplayRef = useRef()
+  const myTurnRef = useRef()
 
-  React.useEffect(() => {
+  playerNumRef.current = playerNum
+  playerDataRef.current = playerData
+  gameToDisplayRef.current = gameToDisplay
+  myTurnRef.current = myTurn
+
+  function dispatchGPUExecuteTurn(ev) {
+ 
+    console.log('zzzzzzzzzzz GPU PlayerNum',playerNumRef.current,gameToDisplayRef.current)
+    const {gameState} = gameToDisplayRef.current
+    const myBins = gameToDisplayRef.current.boardConfig.playerBins[playerNumRef.current]
+    console.log('yyyyyyyyyyy GPU PlayerNum',playerNumRef.current,gameToDisplayRef.current)
+    dispatchExecuteTurn(ev, gameToDisplayRef.current.id, myTurnRef.current, myBins, gameState  )
+  }
+
+/*   React.useEffect(() => {
     window.addEventListener("click",(ev)=>{console.log('mouse click',ev)})
-  },[])
+  },[]) */
 
   //this will fire every time window size changes
   React.useEffect(() => {
@@ -64,8 +87,6 @@ const GPU = (props) => {
     const stones = gameToDisplay.boardConfig.stones
 
     stonesRef.current = stones
-
-    //console.log('zzzzzzzzzzz',stones[1])
 
     if (canvasRef.current && !canvasInitialized) {
   
@@ -105,37 +126,10 @@ const GPU = (props) => {
       const boxWidth = .25;
       const boxHeight = .25;
       const boxDepth = .25;
-      const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+      //const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+      const geometry = new THREE.TetrahedronGeometry(.3)
     
-      //const labelContainerElem = document.createElement('div')
-      //labelContainerElem.id = "labels"
-      //canvas.appendChild(labelContainerElem)
-
-      //const labelContainerElem = labelsRef.current
-
       let initLabelsJSX = []  //we need JSX components so they register with React!!
-
-      function makeInstance(geometry, color, x, y, z, name, binNum) {
-        const material = new THREE.MeshPhongMaterial({color});
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        cube.position.x = x;
-        cube.position.y = y;
-        cube.position.z = z;
-        const elem = document.createElement('div');
-        elem.textContent = name;
-        elem.binNum = binNum;
-
-        //labelContainerElem.appendChild(elem);
-    
-        return {cube, elem};
-      }
-      
-      //probably should be passing all this junk in props
-      const {myTurn,activeGame} = playerData
-      const hasActiveGame =  activeGame && activeGame.hasOwnProperty('display') && activeGame.display 
-      const {gameState} = gameToDisplay
-      const myBins = hasActiveGame ? playerData.myBins : [0,14]
 
       const material = new THREE.MeshPhongMaterial();
       function makeD4Instance(geometry,color,x,y,z,name,binNum) {
@@ -150,19 +144,14 @@ const GPU = (props) => {
 
         d4Group.position.set(x,y,z)
 
-        //const elem = document.createElement('div');
-        //elem.textContent = name;
-        //elem.binNum = binNum;
         const elem = binNum
-
-        //labelContainerElem.appendChild(elem);
 
         initLabelsJSX.push(
           <div 
             key={"label"+binNum} 
             ref={labelRefs[binNum]}
             id={"GPUbinNum" + binNum }
-            onClick={(ev)=>{dispatchExecuteTurn(ev,gameToDisplay.id,myTurn,myBins,gameState)}  }    
+            onClick={(ev)=>{dispatchGPUExecuteTurn(ev)}  }    
           >{stones[binNum]}</div>)
 
         scene.add(d4Group)
@@ -178,13 +167,12 @@ const GPU = (props) => {
       }
 
       const cubes = mancalaCubes( )
-      //console.log('zzzzzzzzzzz',cubes)
 
       setInitLabelsJSX(initLabelsJSX)
 
       function mancalaCubes() {
-        console.log('zzzzzzzzzzz running mancalaCubes')
-        let cubes = []
+
+        let cubes = []  //not really cubes anymore - har har
 
         if ( !gameToDisplay.boardConfig) return cubes   //should not happen
 
@@ -218,7 +206,6 @@ const GPU = (props) => {
       for (let i = 0; i < stones.length; i++) {
         if (stones[i] !== prevStones[i]) {
           newStoneConfig = true;
-          //console.log("someone apparently has made a move");
         }
       }
     }
@@ -238,6 +225,13 @@ const GPU = (props) => {
 
       function render(time) {
 
+        //there is probably a more explicit way to do this but this works
+        try { if (canvas) {} }
+        catch (err) {
+          cancelAnimationFrame(frameIdRef.current)
+          return
+        }
+
         frameIdRef.current = requestAnimationFrame(render);
         //we are rendering way too many times a second
 
@@ -248,18 +242,16 @@ const GPU = (props) => {
         if ( elapsed < fpsInterval ) return;
 
         count ++
-        //console.log('rendering', elapsed)
         time *= 0.001;
         prevRenderTime = currentRenderTime - (elapsed%fpsInterval)
 
-        //console.log('xxxxx',stones[1])
-        cubes.forEach((cubeInfo, ndx) => {
+        cubes.forEach((cubeInfo, idx) => {
 
           //const stones = gameToDisplay.boardConfig.stones
           const {cube, elem} = cubeInfo;
           const  binNum  = elem
 
-          const speed = 1 + ndx * .1;
+          const speed = 1 + idx * .1;
           const rot = time * speed;
           cube.rotation.x = rot;
           cube.rotation.y = rot;
@@ -277,13 +269,6 @@ const GPU = (props) => {
           const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
           const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
     
-          //unhide
-          //elem.style.display = '';
-          // move the elem to that position
-          //elem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
-          // set the zIndex for sorting
-          //elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
-   
           //the key to getting the updated version of stones is the use
           //stonesRef which is maintained by useRef()!!!
           //can't escape the React life cycle - just accept it

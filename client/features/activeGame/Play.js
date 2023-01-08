@@ -38,6 +38,8 @@ const Play = (props) => {
   const [gameOutput, setGameOutput] = useState([])
   const [gameBoard, setGameBoard] = useState([])
   const [gameForGPU,setGameForGPU] = useState({})
+  const [GPUplayerNum,setGPUplayerNum] = useState()
+  const [myTurn, setMyTurn] = useState()
 
   const gameBoardRef = useRef()
 
@@ -78,8 +80,12 @@ const Play = (props) => {
         if (loggedInPlayers[playerName].playStatus == "playing") {
           
           if (loggedInPlayers[playerName].hasOwnProperty("myTurn")) {
+
+            const {playerNum} = loggedInPlayers[playerName]
+            setGPUplayerNum(playerNum)
+            setMyTurn(loggedInPlayers[playerName].myTurn)
+
             if (loggedInPlayers[playerName].myTurn) {
-              const {playerNum} = loggedInPlayers[playerName]
               newGameOutput.push(<p key="yourTurn">Your Turn, Player {playerNum} </p>)
             } else {
               newGameOutput.push(
@@ -212,13 +218,14 @@ const Play = (props) => {
     if (ev && gameId && myTurn && gameState!=='winner') {
       //console.log(ev.clientX, gameId, myTurn, ev.target);
       if (myTurn && String(ev.target.id).includes('bin')  ) {
-        const  binNum = String(ev.target.id).replace(/bin/,'')
-        const binNumFinal = String(binNum).replace(/GPUNum/,'')
+        const  binNumPre = String(ev.target.id).replace(/bin/,'')
+        const binNum = String(binNumPre).replace(/GPUNum/,'')
 
-        //const {myBins} = loggedInPlayers[playerName]
-        //console.log('uuuuuuuuuuuuuuuuu fuuuuuuuuuckkkk',ev.target.id,binNum,binNumFinal,myBins)
+        console.log('in dispatch turn',ev.target.id,binNum,binNumPre,myBins)
         //only dispatch if we are in the range of bins for this player
-        if ( binNumFinal >= myBins[0] && binNumFinal <= myBins[1]) {
+
+        if ( binNum >= myBins[0] && binNum <= myBins[1]) {
+          console.log('got to executeTurn finally')
           dispatch(executeTurn({playerName,binNum}));
         }
       }
@@ -245,6 +252,8 @@ const Play = (props) => {
           canvasRef={canvasRef}
           binRefs={binRefs}
           labelsRef={labelsRef}
+          playerNum={GPUplayerNum}
+          myTurn={myTurn}
         />
         ]
       }

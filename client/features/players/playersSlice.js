@@ -62,6 +62,7 @@ export const cancelRequest = createAsyncThunk('/api/players/cancelRequest', asyn
 export const executeTurn = createAsyncThunk('/api/players/executeTurn', async(obj)=>{
 
   try {
+    console.log('playerSlice',obj)
     const response = await axios.put('/api/players/executeTurn',obj)
     return response.data
   } 
