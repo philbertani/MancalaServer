@@ -22,18 +22,18 @@ form div {
 }
 
 .gameBoard {
-  position:relative; left:0%; top:5%;
-  width: 80vw; height: 60vh; z-Index:0
+  position:relative; left:0%; top:0%;
+  width: 90vw; height: 30vh; z-Index:0
 }
 
-.bin{ position: absolute; width: 10%; height:26%; 
+.bin{ position: absolute; width: 10%; height:40%; 
   border-radius:10px;
   text-align:center; 
   background-color: rgba(200,200,0,.5)
 }
 
 .homeBase { position:absolute; width:10%; 
-  height:56%; background-color:orange;
+  height:85%; background-color:orange;
   border-radius:10px;
   text-align:center; 
 }
@@ -47,10 +47,15 @@ form div {
   z-Index:-1e7;
 }
 
-#GPUcontainer {
+#GPUcontainerx {
   position: relative;  /* makes this the origin of its children */
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
+}
+
+#GPUcontainer {
+  position: relative;  /* makes this the origin of its children */
   overflow: hidden;
 }
 
@@ -88,4 +93,4 @@ form div {
   color: red;
 }
 
-
+.zeroMargin {margin:0}

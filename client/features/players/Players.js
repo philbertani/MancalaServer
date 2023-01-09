@@ -160,23 +160,19 @@ const Players = (props) => {
       />
     );   
 
-    return ( [
-      <div key='playerList'>
-        {playersOutput}
-      </div>,
+    return [
+      <div key="left" id="left">
+        <div key="playerList">{playersOutput}</div>
 
-      <div key='gameRequests'>
-        <h3>Game Status</h3>
-        {gameRequestOutput}
-      </div>,
+        <div key="gameRequests">
+          {gameRequestOutput}
+        </div>
 
-      <div key='activeGame'>
-        <h3>Game Board</h3>
-        {activeGameOutput}
-      </div>
-    ]
-    
-    );
+        <div key="activeGame">
+          {activeGameOutput}
+        </div>
+      </div>,
+    ];
   }
 };
 

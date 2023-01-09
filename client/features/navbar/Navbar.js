@@ -17,10 +17,10 @@ const Navbar = () => {
 
   return (
     <div>
-      <h1>Mancala Player Center</h1>
+      <h3 className="zeroMargin">Mancala Player Center</h3>
       <nav>
         {isLoggedIn ? (
-          <div>
+          <div className="zeroMargin">
             {/* The navbar will show these links after you log in */}
             <Link to="/home">Home</Link>
             <button type="button" onClick={logoutAndRedirectHome}>

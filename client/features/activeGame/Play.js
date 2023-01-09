@@ -126,11 +126,11 @@ const Play = (props) => {
 
           let binOutput = []
           const topOfBoard = 10
-          const leftMargin = 4
+          const leftMargin = 8
           const leftMostBin = 12
   
           const leftEdge = leftMargin + leftMostBin
-          const rightEdge = 6 * 13 + 10
+          const rightEdge = 6 * 13 + 14
   
           const homeBaseLeft = [leftMargin, rightEdge]
   
@@ -144,7 +144,7 @@ const Play = (props) => {
 
           let binNum = 0
           for (let j=0; j<2; j++) {
-            const topOfBin = 30*j  //2 rows of 6 divs
+            const topOfBin = 45*j  //2 rows of 6 divs
   
             binOutput.push(
               <div
@@ -240,8 +240,10 @@ const Play = (props) => {
   //<div key="labelsDiv" id="labels" ref={labelsRef} ></div>,
   return [
 
-    <div key="gameDiv">{gameOutput}</div>,
-    <div key="gameContainer">{gameBoard}</div>,
+    <div key="right" id="right">
+
+    <div key="gameDiv">{gameOutput}</div>
+    <div key="gameContainer">{gameBoard}</div>
 
     <div key="GPUdiv" >
       {gameForGPU.boardConfig && [
@@ -257,8 +259,8 @@ const Play = (props) => {
         />
         ]
       }
-    </div>,
-
+    </div>
+    </div>
   ];
 
 };
