@@ -149,7 +149,7 @@ const GPU = (props) => {
       light.shadow.camera.top = 20; 
 
       const planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
-      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x003000 });
+      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x103010 });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.position.set(0, 0, -4);
       plane.receiveShadow = true;
@@ -161,6 +161,17 @@ const GPU = (props) => {
       const cubeGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
       const geometry = new THREE.TetrahedronGeometry(0.2);
       const pyramid = new THREE.ConeGeometry(2, 1, 4, 1);
+
+
+      //transparent sphere which is our floating "bin"
+      const sphereGeo = new THREE.SphereGeometry(.8,32,16)
+      const transparentMaterial = new THREE.MeshPhongMaterial(
+        { color: 0xFFA0FF, opacity: .1, transparent:true }
+      )
+      const homeBaseMaterial = new THREE.MeshPhongMaterial(
+        { color: 0xFF00FF, opacity: .2, transparent:true }
+      )
+
 
       const baseGeo = cubeGeometry;
 
@@ -200,12 +211,18 @@ const GPU = (props) => {
             cube.receiveShadow = true
             d4Group.add(cube);
           }
+          const sphere = new THREE.Mesh(sphereGeo,transparentMaterial)
+          sphere.receiveShadow = true
+          //sphere.castShadow = true
+          d4Group.add(sphere)
+
         } else if (geoType == "homeBase") {
-          const cube = new THREE.Mesh(geometry, material);
+          //const cube = new THREE.Mesh(geometry, material);
           //cube.material.color.setHex(color);
-          cube.position.set(0, 0, 0);
+          //cube.position.set(0, 0, 0);
           //cube.rotateZ(1.5)
-          d4Group.add(cube);
+          const sphere = new THREE.Mesh(sphereGeo,homeBaseMaterial)
+          d4Group.add(sphere);
         }
 
         d4Group.position.set(x + 1, y, z);
@@ -383,7 +400,9 @@ const GPU = (props) => {
             cube.rotation.x = rot;
             cube.rotation.y = rot;
                 
-            const maxStones = cube.children.length
+            //the enclosing  spehere is the last child - so
+            //always keep it visible
+            const maxStones = cube.children.length-1
             const cappedActualStones = Math.min(maxStones,stonesRef.current[binNum])
             for (let i=0; i<cappedActualStones; i++) {
               cube.children[i].visible = true
