@@ -134,22 +134,28 @@ const GPU = (props) => {
       let initLabelsJSX = []  //we need JSX components so they register with React!!
 
       const material = new THREE.MeshPhongMaterial();
+      material.color.setRGB(0,1,0)
 
-      function makeD4Instance(geoType,geometry,color,x,y,z,name,binNum) {
+      const materials = [new THREE.MeshPhongMaterial(), new THREE.MeshPhongMaterial()]
+      materials[0].color.setRGB(1,0,.5)
+      materials[1].color.setRGB(.5,0,1)
+
+      function makeD4Instance(geoType,geometry,color,x,y,z,name,binNum,playerNum) {
         const d4Group = new THREE.Group()
 
         if (geoType == "regularBin") {
           for (let i = 0; i < d4Vertices.length; i++) {
-            const cube = new THREE.Mesh(geometry, material);
-            cube.material.color.setHex(color);
+            const cube = new THREE.Mesh(geometry, materials[playerNum]);
+            //cube.material.color.setHex(color);
             const [x2, y2, z2] = d4Vertices[i];
             cube.position.set(x2, y2, z2).multiplyScalar(0.2);
+            cube.visible = false
             d4Group.add(cube);
           }
         }
         else if (geoType == 'homeBase') {
           const cube = new THREE.Mesh(geometry, material);
-          cube.material.color.setHex(color);
+          //cube.material.color.setHex(color);
           cube.position.set(0,0,0)
           d4Group.add(cube)
         }
@@ -180,6 +186,7 @@ const GPU = (props) => {
 
       const cubes = mancalaCubes( )
 
+      console.log(cubes[0])
       setInitLabelsJSX(initLabelsJSX)
 
       function mancalaCubes() {
@@ -193,14 +200,14 @@ const GPU = (props) => {
         const p0bins = gameToDisplay.boardConfig.playerBins[0]
         let pos=0
         for ( let i=p0bins[0]; i<=p0bins[1]; i++ ) {  //i is binNum
-          cubes.push(makeD4Instance('regularBin',geometry,0xF000F0,2*(pos-3),1.4,-.3,String(stones[i]),i))
+          cubes.push(makeD4Instance('regularBin',geometry,0xF000F0,2*(pos-3),1.4,-.3,String(stones[i]),i,0))
           pos ++
         }
 
         const p1bins = gameToDisplay.boardConfig.playerBins[1]
         pos = 0
         for ( let i=p1bins[0]; i<=p1bins[1]; i++ ) {  //i is binNum
-          cubes.push(makeD4Instance('regularBin',geometry,0xF000F0,2*(pos-3),-1.4,0,String(stones[i]),i))
+          cubes.push(makeD4Instance('regularBin',geometry,0xF000F0,2*(pos-3),-1.4,0,String(stones[i]),i,1))
           pos ++
         }
 
@@ -210,7 +217,6 @@ const GPU = (props) => {
         cubes.push(makeD4Instance('homeBase',cubeGeometry,0xF000F0,pos,0,-.15,(-stones[homeBase[0]]),homeBase[0]))
         pos = 2*(3)
         cubes.push(makeD4Instance('homeBase',cubeGeometry,0xF000F0,pos,0,-.15,(-stones[homeBase[1]]),homeBase[1]))
-
 
         return cubes
       }
@@ -277,8 +283,18 @@ const GPU = (props) => {
             const rot = time * speed;
             cube.rotation.x = rot;
             cube.rotation.y = rot;
+                
+            for (let i=0; i<stonesRef.current[binNum]; i++) {
+              cube.children[i].visible = true
+            }
+            for (let i=stonesRef.current[binNum]; i<4; i++) {
+              cube.children[i].visible = false
+            }
+            //cube.children[1].visible = false
+            //console.log(cube.children.length)
           }
-    
+
+
           // get the position of the center of the cube
           cube.updateWorldMatrix(true, false);
           cube.getWorldPosition(tempV);
@@ -289,10 +305,11 @@ const GPU = (props) => {
           tempV.project(camera);
    
           // convert the normalized position to CSS coordinates
+          // -1,1 to 0,num pixels
           const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
           const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
     
-          //the key to getting the updated version of stones is the use
+          //the key to getting the updated version of stones is to use
           //stonesRef which is maintained by useRef()!!!
           //can't escape the React life cycle - just accept it
           const labelRef = labelRefs[binNum]
@@ -336,6 +353,5 @@ const GPU = (props) => {
   ])
 
 }
-
 
 export default GPU
