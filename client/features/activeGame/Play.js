@@ -18,7 +18,7 @@ const nextBin = [
   [-1, 8, 1, 2, 3, 4, 5,  6, 9, 10, 11, 12, 13, 7]  //P1 skips hb0
 ]
 
-const initStonesPerBin = 1
+const initStonesPerBin = 4
 let initialStones = Array(14).fill(initStonesPerBin);
 initialStones[0] = 0;
 initialStones[7] = 0;

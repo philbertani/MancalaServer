@@ -1,4 +1,4 @@
-
+import * as THREE from "three"
 
 const t = ( 1 + Math.sqrt( 5 ) ) / 2;
 const r = 1 / t;
@@ -34,4 +34,4 @@ export const d4DualVertices = [
     [-1,-1,-1], [1,1,-1], [1,-1,1], [-1,1,1]
 ]
 // d4 + d4Dual are vertices of a cube
-     
+

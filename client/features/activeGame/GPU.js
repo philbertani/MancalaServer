@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef} from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { d12Vertices, d4Vertices } from "./geometry"
+import { d12Vertices, d4Vertices, Pyramid } from "./geometry"
 import { executeTurn, endGame } from "../players/playersSlice";
 
 //https://r105.threejsfundamentals.org/threejs/lessons/threejs-align-html-elements-to-3d.html
@@ -91,141 +91,240 @@ const GPU = (props) => {
     stonesRef.current = stones
 
     if (canvasRef.current && !canvasInitialized) {
-  
-      const canvas = canvasRef.current; 
+      const canvas = canvasRef.current;
 
       //console.log('zzzzzzzzzz',canvas)
-      const renderer = new THREE.WebGLRenderer({antialias:true});
-    
-      renderer.setSize(window.innerWidth,window.innerHeight/heightMult)
-      renderer.setClearColor("orange", 1);
-      canvas.appendChild(renderer.domElement)
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha:true });
+
+      renderer.setSize(window.innerWidth, window.innerHeight / heightMult);
+      renderer.setClearColor("white", 0);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
+      canvas.appendChild(renderer.domElement);
 
       const fov = 50;
-      const aspect = window.innerWidth/window.innerHeight;  // the canvas default
-      const near = .1;
+      const aspect = window.innerWidth / window.innerHeight; // the canvas default
+      const near = 0.1;
       const far = 2000;
       const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
       camera.position.z = 6;
-    
+
       const controls = new OrbitControls(camera, canvas);
       controls.target.set(0, 0, 0);
       controls.update();
-    
-      const scene = new THREE.Scene();
-    
-      const color = 0xFFFFFF;
-      const intensity = 1;
 
-      //const light = new THREE.DirectionalLight(color, intensity);
-      //light.position.set(-1, 2, 4);
+      const scene = new THREE.Scene();
+
+      const color = 0xffffff;
+      const intensity = .5;
 
       //super cool - light source now emanates from camera!
-      const light = new THREE.PointLight(color,intensity)
+      const light2 = new THREE.PointLight(color, intensity);
       scene.add(camera);
-      camera.add(light)
-    
-      const boxWidth = .7;
+      camera.add(light2);
+
+      const light3 = new THREE.DirectionalLight(0xFFFFA0, 1)
+      light3.position.set(1,3,5)
+      scene.add(light3)
+
+      //Create a DirectionalLight and turn on shadows for the light
+      const light = new THREE.DirectionalLight(0xf0f0ff, 1);
+      light.position.set(0, -3, 5); //default; light shining from top
+      light.castShadow = true; // default false
+      scene.add(light);
+
+      //Set up shadow properties for the light
+      light.shadow.mapSize.width = 1024; // default
+      light.shadow.mapSize.height = 1024; // default
+      light.shadow.camera.near = 0.1; // default
+      light.shadow.camera.far = 1000; // default
+
+      //have to set the range of the orthographic shadow camera
+      //to cover the whole plane we are casting shadows onto
+      //defaults are -5 to 5
+      light.shadow.camera.left = -20;
+      light.shadow.camera.bottom = -20;
+      light.shadow.camera.right = 20;
+      light.shadow.camera.top = 20; 
+
+      const planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
+      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x003000 });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.position.set(0, 0, -4);
+      plane.receiveShadow = true;
+      scene.add(plane);
+
+      const boxWidth = 0.7;
       const boxHeight = 1.5;
-      const boxDepth = .2;
+      const boxDepth = 0.01;
       const cubeGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-      const geometry = new THREE.TetrahedronGeometry(.3)
-    
-      let initLabelsJSX = []  //we need JSX components so they register with React!!
+      const geometry = new THREE.TetrahedronGeometry(0.2);
+      const pyramid = new THREE.ConeGeometry(2, 1, 4, 1);
 
-      const material = new THREE.MeshPhongMaterial();
-      material.color.setRGB(0,1,0)
+      const baseGeo = cubeGeometry;
 
-      const materials = [new THREE.MeshPhongMaterial(), new THREE.MeshPhongMaterial()]
-      materials[0].color.setRGB(1,0,.5)
-      materials[1].color.setRGB(.5,0,1)
+      let initLabelsJSX = []; //we need JSX components so they register with React!!
 
-      function makeD4Instance(geoType,geometry,color,x,y,z,name,binNum,playerNum) {
-        const d4Group = new THREE.Group()
+      const material = new THREE.MeshPhongMaterial({color:0x003000});
+
+      //each material is a new shader instance so use them sparingly
+      const materials = [
+        new THREE.MeshPhongMaterial(),
+        new THREE.MeshPhongMaterial(),
+      ];
+      materials[0].color.setRGB(.5, 0, 0.25);
+      materials[1].color.setRGB(0.25, 0, .5);
+
+      function makeD4Instance(
+        geoType,
+        geometry,
+        color,
+        x,
+        y,
+        z,
+        name,
+        binNum,
+        playerNum
+      ) {
+        const d4Group = new THREE.Group();
 
         if (geoType == "regularBin") {
-          for (let i = 0; i < d4Vertices.length; i++) {
+          for (let i = 0; i < d12Vertices.length; i++) {
             const cube = new THREE.Mesh(geometry, materials[playerNum]);
             //cube.material.color.setHex(color);
-            const [x2, y2, z2] = d4Vertices[i];
+            const [x2, y2, z2] = d12Vertices[i];
             cube.position.set(x2, y2, z2).multiplyScalar(0.2);
-            cube.visible = false
+            cube.visible = false;
+            cube.castShadow = true
+            cube.receiveShadow = true
             d4Group.add(cube);
           }
-        }
-        else if (geoType == 'homeBase') {
+        } else if (geoType == "homeBase") {
           const cube = new THREE.Mesh(geometry, material);
           //cube.material.color.setHex(color);
-          cube.position.set(0,0,0)
-          d4Group.add(cube)
+          cube.position.set(0, 0, 0);
+          //cube.rotateZ(1.5)
+          d4Group.add(cube);
         }
 
-        d4Group.position.set(x+1,y,z)
+        d4Group.position.set(x + 1, y, z);
 
-        const elem = binNum
+        const elem = binNum;
 
         initLabelsJSX.push(
-          <div 
-            key={"label"+binNum} 
+          <div
+            key={"label" + binNum}
             ref={labelRefs[binNum]}
-            id={"GPUbinNum" + binNum }
-            onClick={(ev)=>{dispatchGPUExecuteTurn(ev)}  }    
-          >{stones[binNum]}</div>)
+            id={"GPUbinNum" + binNum}
+            onClick={(ev) => {
+              dispatchGPUExecuteTurn(ev);
+            }}
+          >
+            {stones[binNum]}
+          </div>
+        );
 
-        scene.add(d4Group)
+        scene.add(d4Group);
 
-        return {cube:d4Group, elem }
+        return { cube: d4Group, elem };
       }
 
-      if ( gameToDisplay.boardConfig) {
-        console.log('boardConfig exists')
-      }
-      else {
-        console.log('no boardConfig')
+      if (gameToDisplay.boardConfig) {
+        console.log("boardConfig exists");
+      } else {
+        console.log("no boardConfig");
       }
 
-      const cubes = mancalaCubes( )
+      const cubes = mancalaCubes();
 
-      console.log(cubes[0])
-      setInitLabelsJSX(initLabelsJSX)
+      console.log(cubes[0]);
+      setInitLabelsJSX(initLabelsJSX);
 
       function mancalaCubes() {
+        let cubes = []; //not really cubes anymore - har har
 
-        let cubes = []  //not really cubes anymore - har har
-
-        if ( !gameToDisplay.boardConfig) return cubes   //should not happen
+        if (!gameToDisplay.boardConfig) return cubes; //should not happen
 
         //const stones = gameToDisplay.boardConfig.stones
 
-        const p0bins = gameToDisplay.boardConfig.playerBins[0]
-        let pos=0
-        for ( let i=p0bins[0]; i<=p0bins[1]; i++ ) {  //i is binNum
-          cubes.push(makeD4Instance('regularBin',geometry,0xF000F0,2*(pos-3),1.4,-.3,String(stones[i]),i,0))
-          pos ++
+        const p0bins = gameToDisplay.boardConfig.playerBins[0];
+        let pos = 0;
+        for (let i = p0bins[0]; i <= p0bins[1]; i++) {
+          //i is binNum
+          cubes.push(
+            makeD4Instance(
+              "regularBin",
+              geometry,
+              0xf000f0,
+              2 * (pos - 3),
+              1.4,
+              -0.3,
+              String(stones[i]),
+              i,
+              0
+            )
+          );
+          pos++;
         }
 
-        const p1bins = gameToDisplay.boardConfig.playerBins[1]
-        pos = 0
-        for ( let i=p1bins[0]; i<=p1bins[1]; i++ ) {  //i is binNum
-          cubes.push(makeD4Instance('regularBin',geometry,0xF000F0,2*(pos-3),-1.4,0,String(stones[i]),i,1))
-          pos ++
+        const p1bins = gameToDisplay.boardConfig.playerBins[1];
+        pos = 0;
+        for (let i = p1bins[0]; i <= p1bins[1]; i++) {
+          //i is binNum
+          cubes.push(
+            makeD4Instance(
+              "regularBin",
+              geometry,
+              0xf000f0,
+              2 * (pos - 3),
+              -1.4,
+              0,
+              String(stones[i]),
+              i,
+              1
+            )
+          );
+          pos++;
         }
 
-        const {homeBase} = gameToDisplayRef.current.boardConfig
-        const numBins = stones.length/2
-        pos = 2*(-4)
-        cubes.push(makeD4Instance('homeBase',cubeGeometry,0xF000F0,pos,0,-.15,(-stones[homeBase[0]]),homeBase[0]))
-        pos = 2*(3)
-        cubes.push(makeD4Instance('homeBase',cubeGeometry,0xF000F0,pos,0,-.15,(-stones[homeBase[1]]),homeBase[1]))
+        const { homeBase } = gameToDisplayRef.current.boardConfig;
+        const numBins = stones.length / 2;
+        pos = 2 * -4;
+        cubes.push(
+          makeD4Instance(
+            "homeBase",
+            baseGeo,
+            0xf000f0,
+            pos,
+            0,
+            -0.15,
+            -stones[homeBase[0]],
+            homeBase[0]
+          )
+        );
+        pos = 2 * 3;
+        cubes.push(
+          makeD4Instance(
+            "homeBase",
+            baseGeo,
+            0xf000f0,
+            pos,
+            0,
+            -0.15,
+            -stones[homeBase[1]],
+            homeBase[1]
+          )
+        );
 
-        return cubes
+        return cubes;
       }
-    
+
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
 
-      setGL({renderer,camera,scene,cubes})
-      setCanvasInitialized(true)
+      setGL({ renderer, camera, scene, cubes });
+      setCanvasInitialized(true);
     }
 
     let newStoneConfig = false;
@@ -244,7 +343,7 @@ const GPU = (props) => {
       
       //we need to throttle the fps to maintain game speed
       //too much else going on with React and Express
-      const fps = 32
+      const fps = 20
       const fpsInterval = 1000/fps
       let prevRenderTime = Date.now()
       const {homeBase} = gameToDisplayRef.current.boardConfig
@@ -279,21 +378,20 @@ const GPU = (props) => {
           const  binNum  = elem
 
           if (  !(binNum === homeBase[0] || binNum === homeBase[1]) ) {
-            const speed = 1 + idx * .1;
+            const speed = .1 + idx * .1;
             const rot = time * speed;
             cube.rotation.x = rot;
             cube.rotation.y = rot;
                 
-            for (let i=0; i<stonesRef.current[binNum]; i++) {
+            const maxStones = cube.children.length
+            const cappedActualStones = Math.min(maxStones,stonesRef.current[binNum])
+            for (let i=0; i<cappedActualStones; i++) {
               cube.children[i].visible = true
             }
-            for (let i=stonesRef.current[binNum]; i<4; i++) {
+            for (let i=cappedActualStones; i<maxStones; i++) {
               cube.children[i].visible = false
             }
-            //cube.children[1].visible = false
-            //console.log(cube.children.length)
           }
-
 
           // get the position of the center of the cube
           cube.updateWorldMatrix(true, false);
