@@ -400,7 +400,7 @@ const GPU = (props) => {
             const speed = Math.min(8,stonesRef.current[binNum])*.5
             const rot = time * speed;
             cube.rotation.x = rot + idx;
-            cube.rotation.y = time*idx*.1;
+            cube.rotation.y = stonesRef.current[binNum]===0 ? 0 : time*idx*.1;
             //cube.rotation.z = rot/2;
                 
             //the enclosing  spehere is the last child - so
