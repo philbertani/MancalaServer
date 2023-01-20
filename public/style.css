@@ -23,8 +23,8 @@ form div {
 }
 
 .gameBoard {
-  position:relative; left:0%; top:0%;
-  width: 90vw; height: 30vh; z-Index:0
+  position:relative; left:28%; top:0%;
+  width: 40vw; height: 20vh; z-Index:0
 }
 
 .bin{ position: absolute; width: 10%; height:40%; 
@@ -67,6 +67,7 @@ form div {
   top: 0;
   color: white;
 }
+
 #labels>div {
   background-color: rgba(0,0,0,0);
   border-radius: 10px;

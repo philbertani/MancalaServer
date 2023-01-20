@@ -98,7 +98,7 @@ const Play = (props) => {
           }
         }
   
-        const bgcolors = ['rgba(150,0,150,.5)','(255,255,0,.5']
+        const bgcolors = ['rgba(150,0,150,1)','(255,255,0,1']
         const colors = ['yellow','purple']
 
         const playingGame = activeGame ? (activeGame.gameState=='playing' || activeGame.gameState=='winner') : false 
@@ -170,7 +170,7 @@ const Play = (props) => {
                   id={"bin"+binNum}
                   className="bin"
                   style={{left:`${leftEdge+i*12}%`,top:`${topOfBin+topOfBoard}%`,
-                    backgroundColor:bgcolors[j],color:colors[j]}}
+                    backgroundColor:bgcolors[j],color:"white"}}
                 >
                   {stones[binNum]}
                 </div>
@@ -239,27 +239,27 @@ const Play = (props) => {
   //this was right before GPUdiv
   //<div key="labelsDiv" id="labels" ref={labelsRef} ></div>,
   return [
-
     <div key="right" id="right">
+      <div key="gameDiv">{gameOutput}</div>
 
-    <div key="gameDiv">{gameOutput}</div>
-    <div key="gameContainer">{gameBoard}</div>
 
-    <div key="GPUdiv" >
-      {gameForGPU.boardConfig && [
-        <GPU key="GPU"
-          dispatchExecuteTurn={dispatchExecuteTurn}
-          playerData={loggedInPlayers[playerName]} 
-          gameToDisplay={gameForGPU}
-          canvasRef={canvasRef}
-          binRefs={binRefs}
-          labelsRef={labelsRef}
-          playerNum={GPUplayerNum}
-          myTurn={myTurn}
-        />
-        ]
-      }
-    </div>
+      <div key="GPUdiv">
+        {gameForGPU.boardConfig && [
+          <GPU
+            key="GPU"
+            dispatchExecuteTurn={dispatchExecuteTurn}
+            playerData={loggedInPlayers[playerName]}
+            gameToDisplay={gameForGPU}
+            canvasRef={canvasRef}
+            binRefs={binRefs}
+            labelsRef={labelsRef}
+            playerNum={GPUplayerNum}
+            myTurn={myTurn}
+          />
+        ]}
+      </div>
+
+      <div key="gameContainer">{gameBoard}</div>
     </div>
   ];
 

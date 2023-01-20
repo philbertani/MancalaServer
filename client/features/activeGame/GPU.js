@@ -108,7 +108,7 @@ const GPU = (props) => {
       const near = 0.1;
       const far = 2000;
       const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-      camera.position.z = 6;
+      camera.position.set(0,-3.5,4)
 
       const controls = new OrbitControls(camera, canvas);
       controls.target.set(0, 0, 0);
@@ -130,7 +130,7 @@ const GPU = (props) => {
 
       //Create a DirectionalLight and turn on shadows for the light
       const light = new THREE.DirectionalLight(0xf0f0ff, 1);
-      light.position.set(0, -3, 5); //default; light shining from top
+      light.position.set(0, -4, 5); //default; light shining from top
       light.castShadow = true; // default false
       scene.add(light);
 
@@ -151,7 +151,7 @@ const GPU = (props) => {
       const planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
       const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x103010 });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(0, 0, -4);
+      plane.position.set(0, 0, -6);
       plane.receiveShadow = true;
       scene.add(plane);
 
@@ -162,16 +162,18 @@ const GPU = (props) => {
       const geometry = new THREE.TetrahedronGeometry(0.2);
       const pyramid = new THREE.ConeGeometry(2, 1, 4, 1);
 
-
       //transparent sphere which is our floating "bin"
-      const sphereGeo = new THREE.SphereGeometry(.8,32,16)
+      const geoBin = new THREE.DodecahedronGeometry(.8)
+      //THREE.SphereGeometry(.8,32,16)
+
       const transparentMaterial = new THREE.MeshPhongMaterial(
         { color: 0xFFA0FF, opacity: .1, transparent:true }
       )
+
+      const geoBase = new THREE.IcosahedronGeometry(1.2)
       const homeBaseMaterial = new THREE.MeshPhongMaterial(
         { color: 0xFF00FF, opacity: .2, transparent:true }
       )
-
 
       const baseGeo = cubeGeometry;
 
@@ -211,7 +213,7 @@ const GPU = (props) => {
             cube.receiveShadow = true
             d4Group.add(cube);
           }
-          const sphere = new THREE.Mesh(sphereGeo,transparentMaterial)
+          const sphere = new THREE.Mesh(geoBin,transparentMaterial)
           sphere.receiveShadow = true
           //sphere.castShadow = true
           d4Group.add(sphere)
@@ -221,7 +223,7 @@ const GPU = (props) => {
           //cube.material.color.setHex(color);
           //cube.position.set(0, 0, 0);
           //cube.rotateZ(1.5)
-          const sphere = new THREE.Mesh(sphereGeo,homeBaseMaterial)
+          const sphere = new THREE.Mesh(geoBase,homeBaseMaterial)
           d4Group.add(sphere);
         }
 
@@ -395,10 +397,11 @@ const GPU = (props) => {
           const  binNum  = elem
 
           if (  !(binNum === homeBase[0] || binNum === homeBase[1]) ) {
-            const speed = .1 + idx * .1;
+            const speed = Math.min(8,stonesRef.current[binNum])*.5
             const rot = time * speed;
-            cube.rotation.x = rot;
-            cube.rotation.y = rot;
+            cube.rotation.x = rot + idx;
+            cube.rotation.y = time*idx*.1;
+            //cube.rotation.z = rot/2;
                 
             //the enclosing  spehere is the last child - so
             //always keep it visible
@@ -409,6 +412,15 @@ const GPU = (props) => {
             }
             for (let i=cappedActualStones; i<maxStones; i++) {
               cube.children[i].visible = false
+            }
+          }
+          else {
+            if (stonesRef.current[binNum] < 5) {
+              cube.rotation.x = time * stonesRef.current[binNum]
+            }
+            else if (stonesRef.current[binNum] < 10) {
+              cube.rotation.x = time * 5
+              cube.rotation.y = time * (stonesRef.current[binNum]-5)
             }
           }
 
