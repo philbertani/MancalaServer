@@ -159,7 +159,7 @@ const GPU = (props) => {
       const boxHeight = 1.5;
       const boxDepth = 0.01;
       const cubeGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-      const geometry = new THREE.TetrahedronGeometry(0.2);
+      const geometry = new THREE.IcosahedronGeometry(.2); //new THREE.TetrahedronGeometry(0.2);
       const pyramid = new THREE.ConeGeometry(2, 1, 4, 1);
 
       //transparent sphere which is our floating "bin"
