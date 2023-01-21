@@ -163,21 +163,17 @@ const GPU = (props) => {
       light.shadow.camera.top = 20; 
 
       const planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
-      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x003010, shininess:10 });
+      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x003010, shininess:40 });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(0, 0, -4);
+      plane.position.set(0, 0, -3);
       plane.receiveShadow = true;
       scene.add(plane);
 
-      const boxWidth = 0.7;
-      const boxHeight = 1.5;
-      const boxDepth = 0.01;
-      const cubeGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-      const geometry = new THREE.IcosahedronGeometry(.2); //new THREE.TetrahedronGeometry(0.2);
-      const pyramid = new THREE.ConeGeometry(2, 1, 4, 1);
-
-      //transparent sphere which is our floating "bin"
+      const geometry = new THREE.IcosahedronGeometry(.2);    
+      //transparent d12 which is our floating "bin"
       const geoBin = new THREE.DodecahedronGeometry(.8)
+
+      //const pyramid = new THREE.ConeGeometry(2, 1, 4, 1);
       //THREE.SphereGeometry(.8,32,16)
 
       const transparentMaterial = new THREE.MeshPhongMaterial(
@@ -190,7 +186,7 @@ const GPU = (props) => {
         //{ color: 0xF000FF, wireframe:true }
       )
 
-      const baseGeo = cubeGeometry;
+      const baseGeo = geoBase;
 
       let initLabelsJSX = []; //we need JSX components so they register with React!!
 
