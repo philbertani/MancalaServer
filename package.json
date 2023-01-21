@@ -16,7 +16,9 @@
     "test": "set NODE_ENV=test && JWT=a_secret && mocha \"./server/**/*.spec.js\" \"./client/**/*.spec.js\" --require @babel/register --require esm ",
     "test:dev": "npm run test -- --watch",
     "test:dev:models": "npm run test:dev -- --grep=model",
-    "test:dev:routes": "npm run test:dev -- --grep=route"
+    "test:dev:routes": "npm run test:dev -- --grep=route",
+    "seed:render": "DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala node script/seed.js",
+    "start:render": "SEED=true DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala npm run build:dev & npm run start-server"
   },
   "author": "Fullstack Academy of Code",
   "license": "MIT",
