@@ -11,14 +11,15 @@
     "start:dev": "npm run build:dev & npm run start-server",
     "start:dev:logger": "LOGGING=true npm run start:dev",
     "start:dev:seed": "SEED=true npm run start:dev",
-    "start-server": "JWT=shh3 && nodemon server -e html,js,scss --ignore public --ignore client",
+    "start-server": "JWT=shh3 nodemon server -e html,js,scss --ignore public --ignore client",
     "start-server-win": "set JWT=shh3 && nodemon server -e html,js,scss --ignore public --ignore client",
     "test": "set NODE_ENV=test && JWT=a_secret && mocha \"./server/**/*.spec.js\" \"./client/**/*.spec.js\" --require @babel/register --require esm ",
     "test:dev": "npm run test -- --watch",
     "test:dev:models": "npm run test:dev -- --grep=model",
     "test:dev:routes": "npm run test:dev -- --grep=route",
     "seed:render": "DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala node script/seed.js",
-    "start:render": "SEED=true DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala npm run build:dev & npm run start-server"
+    "start:render": "npm run build:dev & npm run start-server-render",
+    "start-server-render": "DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala JWT=shh3 SEED=true nodemon server -e html,js,scss --ignore public --ignore client"
   },
   "author": "Fullstack Academy of Code",
   "license": "MIT",
