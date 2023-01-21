@@ -106,32 +106,45 @@ const GPU = (props) => {
       const fov = 50;
       const aspect = window.innerWidth / window.innerHeight; // the canvas default
       const near = 0.1;
-      const far = 2000;
+      const far = 1000;
       const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-      camera.position.set(0,-3.5,4)
 
-      const controls = new OrbitControls(camera, canvas);
-      controls.target.set(0, 0, 0);
-      controls.update();
+      if (playerNumRef.current === 1 ) {
+        camera.position.set(0,-3.5,4.5)
+        camera.lookAt(0,0,0)
+      }
+      else {
+        camera.position.set(0,3.5,4.5)
+        camera.lookAt(0,0,0)
+        camera.rotateZ(Math.PI)
+      }
+
+      //const controls = new OrbitControls(camera, canvas);
+      //controls.target.set(0, 0, 0);
+      //controls.update();
 
       const scene = new THREE.Scene();
 
       const color = 0xffffff;
-      const intensity = .5;
-
-      //super cool - light source now emanates from camera!
+      const intensity = .4;
       const light2 = new THREE.PointLight(color, intensity);
       scene.add(camera);
+
+      //super cool - light source now emanates from camera!
       camera.add(light2);
 
-      const light3 = new THREE.DirectionalLight(0xFFFFA0, 1)
+      const light3 = new THREE.DirectionalLight(0xFFA0A0, .8)
       light3.position.set(1,3,5)
       scene.add(light3)
 
+      const light4 = new THREE.DirectionalLight(0xFFA0A0, .8)
+      light4.position.set(1,-3,5)
+      scene.add(light4)
+
       //Create a DirectionalLight and turn on shadows for the light
       const light = new THREE.DirectionalLight(0xf0f0ff, 1);
-      light.position.set(0, -4, 5); //default; light shining from top
-      light.castShadow = true; // default false
+      light.position.set(0, 0, 5); //default; light shining from top
+      light.castShadow = true; 
       scene.add(light);
 
       //Set up shadow properties for the light
@@ -149,9 +162,9 @@ const GPU = (props) => {
       light.shadow.camera.top = 20; 
 
       const planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
-      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x103010 });
+      const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x003010, shininess:10 });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(0, 0, -6);
+      plane.position.set(0, 0, -4);
       plane.receiveShadow = true;
       scene.add(plane);
 
@@ -167,12 +180,13 @@ const GPU = (props) => {
       //THREE.SphereGeometry(.8,32,16)
 
       const transparentMaterial = new THREE.MeshPhongMaterial(
-        { color: 0xFFA0FF, opacity: .1, transparent:true }
+        { color: "rgb(255,100,255)", opacity: .1, transparent:true }
       )
 
       const geoBase = new THREE.IcosahedronGeometry(1.2)
       const homeBaseMaterial = new THREE.MeshPhongMaterial(
-        { color: 0xFF00FF, opacity: .2, transparent:true }
+        { color: "rgb(60,40,100)", opacity: .4, transparent:true }
+        //{ color: 0xF000FF, wireframe:true }
       )
 
       const baseGeo = cubeGeometry;
@@ -183,8 +197,8 @@ const GPU = (props) => {
 
       //each material is a new shader instance so use them sparingly
       const materials = [
-        new THREE.MeshPhongMaterial(),
-        new THREE.MeshPhongMaterial(),
+        new THREE.MeshPhongMaterial({shininess:1000}),
+        new THREE.MeshPhongMaterial({shininess:1000}),
       ];
       materials[0].color.setRGB(.5, 0, 0.25);
       materials[1].color.setRGB(0.25, 0, .5);
@@ -277,8 +291,8 @@ const GPU = (props) => {
               geometry,
               0xf000f0,
               2 * (pos - 3),
-              1.4,
-              -0.3,
+              1.,
+              0,
               String(stones[i]),
               i,
               0
@@ -297,7 +311,7 @@ const GPU = (props) => {
               geometry,
               0xf000f0,
               2 * (pos - 3),
-              -1.4,
+              -1.,
               0,
               String(stones[i]),
               i,
@@ -358,6 +372,17 @@ const GPU = (props) => {
     if ( canvasInitialized) {
 
       const {renderer,camera,scene,cubes} = GL
+
+      if (playerNumRef.current === 1 ) {
+        camera.position.set(0,-3.5,4.5)
+        camera.lookAt(0,0,0)
+      }
+      else {
+        camera.position.set(0,3.5,4.5)
+        camera.lookAt(0,0,0)
+        camera.rotateZ(Math.PI)
+      }
+
       const tempV = new THREE.Vector3();
       
       //we need to throttle the fps to maintain game speed
@@ -392,7 +417,6 @@ const GPU = (props) => {
 
         cubes.forEach((cubeInfo, idx) => {
 
-          //const stones = gameToDisplay.boardConfig.stones
           const {cube, elem} = cubeInfo;
           const  binNum  = elem
 
@@ -415,13 +439,7 @@ const GPU = (props) => {
             }
           }
           else {
-            if (stonesRef.current[binNum] < 5) {
-              cube.rotation.x = time * stonesRef.current[binNum]
-            }
-            else if (stonesRef.current[binNum] < 10) {
-              cube.rotation.x = time * 5
-              cube.rotation.y = time * (stonesRef.current[binNum]-5)
-            }
+            cube.rotation.y = .2 * time * Math.min(25,stonesRef.current[binNum])
           }
 
           // get the position of the center of the cube
