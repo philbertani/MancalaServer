@@ -191,10 +191,9 @@ const Play = (props) => {
                   ? (ev) => {
                       dispatchExecuteTurn(
                         ev,
-                        gameToDisplay.id,
+                        gameToDisplay,
                         myTurn,
-                        myBins,
-                        gameState
+                        myBins
                       );
                     }
                   : undefined
@@ -214,9 +213,15 @@ const Play = (props) => {
 
   },[loggedInPlayers]);  //loggedInPlayers gets updated by setInterval from parent: Players
 
-  const dispatchExecuteTurn = (ev, gameId, myTurn, myBins, gameState) => {
+  //const dispatchExecuteTurn = (ev, gameToDisplay, gameId, myTurn, myBins, gameState) => {
+  const dispatchExecuteTurn = (ev, gameToDisplay, myTurn, myBins ) => {
+
+    const {id, gameState} = gameToDisplay
+    const gameId = id
+
+    console.log(ev.target.id, gameId, myTurn, gameState)
     if (ev && gameId && myTurn && gameState!=='winner') {
-      //console.log(ev.clientX, gameId, myTurn, ev.target);
+
       if (myTurn && String(ev.target.id).includes('bin')  ) {
         const  binNumPre = String(ev.target.id).replace(/bin/,'')
         const binNum = String(binNumPre).replace(/GPUNum/,'')
@@ -224,9 +229,15 @@ const Play = (props) => {
         console.log('in dispatch turn',ev.target.id,binNum,binNumPre,myBins)
         //only dispatch if we are in the range of bins for this player
 
-        if ( binNum >= myBins[0] && binNum <= myBins[1]) {
+        if ( binNum >= myBins[0] && binNum <= myBins[1] ) {
           console.log('got to executeTurn finally')
-          dispatch(executeTurn({playerName,binNum}));
+          const stones = gameToDisplay.boardConfig.stones
+          if ( stones[binNum] <= 0 ) {
+            console.log('you must pick a bin that has stones')
+          }
+          else {
+            dispatch(executeTurn({playerName,binNum}));
+          }
         }
       }
     }

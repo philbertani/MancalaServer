@@ -59,7 +59,8 @@ const GPU = (props) => {
     const {gameState} = gameToDisplayRef.current
     const myBins = gameToDisplayRef.current.boardConfig.playerBins[playerNumRef.current]
     //console.log('yyyyyyyyyyy GPU PlayerNum',playerNumRef.current,gameToDisplayRef.current)
-    dispatchExecuteTurn(ev, gameToDisplayRef.current.id, myTurnRef.current, myBins, gameState  )
+    //
+    dispatchExecuteTurn( ev, gameToDisplayRef.current, myTurnRef.current, myBins )
   }
 
 /*   React.useEffect(() => {
@@ -180,7 +181,7 @@ const GPU = (props) => {
       //THREE.SphereGeometry(.8,32,16)
 
       const transparentMaterial = new THREE.MeshPhongMaterial(
-        { color: "rgb(255,100,255)", opacity: .1, transparent:true }
+        { color: "rgb(255,100,255)", opacity: .25, transparent:true }
       )
 
       const geoBase = new THREE.IcosahedronGeometry(1.2)
