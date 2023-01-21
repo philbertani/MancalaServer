@@ -1,6 +1,6 @@
 {
   "name": "mancala",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "maybe multiplayer mancala game server",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "start:dev": "npm run build:dev & npm run start-server",
     "start:dev:logger": "LOGGING=true npm run start:dev",
     "start:dev:seed": "SEED=true npm run start:dev",
-    "start-server": "set JWT=shh3 && nodemon server -e html,js,scss --ignore public --ignore client",
+    "start-server": "JWT=shh3 && nodemon server -e html,js,scss --ignore public --ignore client",
+    "start-server-win": "set JWT=shh3 && nodemon server -e html,js,scss --ignore public --ignore client",
     "test": "set NODE_ENV=test && JWT=a_secret && mocha \"./server/**/*.spec.js\" \"./client/**/*.spec.js\" --require @babel/register --require esm ",
     "test:dev": "npm run test -- --watch",
     "test:dev:models": "npm run test:dev -- --grep=model",
