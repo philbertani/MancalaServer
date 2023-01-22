@@ -18,7 +18,7 @@ const nextBin = [
   [-1, 8, 1, 2, 3, 4, 5,  6, 9, 10, 11, 12, 13, 7]  //P1 skips hb0
 ]
 
-const initStonesPerBin = 2
+const initStonesPerBin = 1
 let initialStones = Array(14).fill(initStonesPerBin);
 initialStones[0] = 0;
 initialStones[7] = 0;
@@ -184,7 +184,7 @@ const Play = (props) => {
           if ( winnerInfo.winnerName ) {
             newGameBoard.push(
               <div style={{ position:"absolute", left:"50%",transform:"translate(-50%,0)",
-                top:"28vh",wordBreak:"break-all",fontSize:"2em" }} key="winnerDiv">
+                top:"28vh",wordBreak:"break-all",fontSize:"1.7em" }} key="winnerDiv">
                 {gameState} {JSON.stringify(winnerInfo)}
               </div> 
             )
@@ -260,9 +260,9 @@ const Play = (props) => {
 
     <div key="gameContainer" id="gameContainer">
 
-      <div key="gameContainer">{gameBoard}</div>
+      <div style={{margin:"0"}} key="gameContainer">{gameBoard}</div>
 
-      <div style={{position:"absolute",left:"50%",transform:"translate(-50%,0)",fontSize:"1.5em"}} 
+      <div style={{position:"absolute",top:"17vh",left:"50%",transform:"translate(-50%,0)",fontSize:"1.5em"}} 
         key="gameDiv">{gameOutput}</div>
 
       <div key="GPUdiv" style={{position:"absolute",top:"37vh"}}>
