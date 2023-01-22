@@ -24,6 +24,13 @@ export const d12Vertices = [
     [- t, 0, r], [t, 0, r]
 ];
 
+export const d20Vertices = [
+    [- 1, t, 0], 	[1, t, 0], 	[- 1, - t, 0], 	[1, - t, 0],
+    [0, - 1, t], 	[0, 1, t],	[0, - 1, - t], 	[0, 1, - t],
+    [t, 0, - 1], 	[t, 0, 1], 	[- t, 0, - 1], 	[- t, 0, 1]
+];
+
+
 //2*root2 length centered at origin
 export const d4Vertices = [
     [1,1,1], [-1,-1,1], [-1,1,-1], [1,-1,-1]

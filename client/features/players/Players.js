@@ -5,7 +5,7 @@ import {v4 } from "uuid"
 import Play, {boardConfig} from "../activeGame/Play"
 
 let renderCount = 0
-
+const sp='\u00A0'
 //currently a third player can Request Game and get a Cancel Game button for 
 //a game that the requested player is playing and he can cancel it!!!#%$%!$
 
@@ -65,6 +65,7 @@ const Players = (props) => {
       const disconnectedMessage = timeDiff > 10 ? 'Disconnected' : null
 
       const thisPlayer = loggedInPlayers[opponentName]
+      const playingMe = thisPlayer.hasOwnProperty('activeGame') && thisPlayer.playerName == playerName
       const playCheck = thisPlayer.hasOwnProperty('activeGame')
       const preGameCheck = thisPlayer.playStatus == "preGame"
       const cancelCheck = preGameCheck || playCheck
@@ -81,18 +82,32 @@ const Players = (props) => {
       if (  (requested == opponentName && cancelCheck) || acceptedCheck ) {
         let message = ""
         if (preGameCheck) {message = "Cancel Request"}
-        else if (playCheck) {message = "Cancel Game" }
+        else if (playCheck && !playingMe) { message = "Cancel Game" }
         playersOutput.push(
-          <p key={opponentName+"cancel"}>{opponentName}</p>,
-          <button key={key+'cancelGame'} onClick={(ev)=>{dispatchDenyGame(ev,opponentName)}}>{message}</button>   
+          <span key={opponentName+"cancel"}>
+            <p key={opponentName+"cancelSpan"}>{opponentName}{sp}
+              <button key={key+'cancelGame'} onClick={(ev)=>{dispatchDenyGame(ev,opponentName)}}>{message}</button> 
+            </p>
+          </span>  
+        )
+      }
+      else if (playCheck) {
+        playersOutput.push(
+          <span key={opponentName+"AlreadyPlayingSpan"}>
+            <p key={opponentName+"AlreadyPlaying"}>{opponentName}{sp}
+              <button>with {thisPlayer.opponent}</button>
+            </p>
+          </span>
         )
       }
       else {
-        let message = ""
-        message = "Request Game"
+        let message = "Request Game"
         playersOutput.push(
-          <p key={opponentName+"request"}>{opponentName}</p>,
-          <button key={key+'requestGame'} onClick={(ev)=>{requestGame(ev,opponentName)}}>{message}</button>
+          <span key={opponentName+"requestSpan"}>
+            <p key={opponentName+"request"}>{opponentName}{sp}
+            <button key={key+'requestGame'} onClick={(ev)=>{requestGame(ev,opponentName)}}>{message}</button>
+            </p>
+          </span>
         )
       }
     }

@@ -1,13 +1,28 @@
 import React, { useState, useEffect, useRef} from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { d12Vertices, d4Vertices, Pyramid } from "./geometry"
-import { executeTurn, endGame } from "../players/playersSlice";
+import { d12Vertices, d20Vertices } from "./geometry"
 
 //https://r105.threejsfundamentals.org/threejs/lessons/threejs-align-html-elements-to-3d.html
 //let cubes = []
 //let isRendering = false
 let count = 0  //useRef() replaces all this kind of stuff
+
+function setShadow(light) {
+  light.castShadow = true;
+  light.shadow.mapSize.width = 1024;
+  light.shadow.mapSize.height = 1024;
+  light.shadow.camera.near = 0.1;
+  light.shadow.camera.far = 1000;
+
+  //have to set the range of the orthographic shadow camera
+  //to cover the whole plane we are casting shadows onto
+  //defaults are -5 to 5
+  light.shadow.camera.left = -20;
+  light.shadow.camera.bottom = -20;
+  light.shadow.camera.right = 20;
+  light.shadow.camera.top = 20;
+}
 
 //GPU (any high end graphics like canvas or WebGL/Three.js goes here)
 const GPU = (props) => {
@@ -54,18 +69,10 @@ const GPU = (props) => {
   myTurnRef.current = myTurn
 
   function dispatchGPUExecuteTurn(ev) {
- 
-    console.log('zzzzzzzzzzz GPU PlayerNum',playerNumRef.current,gameToDisplayRef.current)
     const {gameState} = gameToDisplayRef.current
     const myBins = gameToDisplayRef.current.boardConfig.playerBins[playerNumRef.current]
-    //console.log('yyyyyyyyyyy GPU PlayerNum',playerNumRef.current,gameToDisplayRef.current)
-    //
     dispatchExecuteTurn( ev, gameToDisplayRef.current, myTurnRef.current, myBins )
   }
-
-/*   React.useEffect(() => {
-    window.addEventListener("click",(ev)=>{console.log('mouse click',ev)})
-  },[]) */
 
   //this will fire every time window size changes
   React.useEffect(() => {
@@ -85,6 +92,7 @@ const GPU = (props) => {
     }
   },[windowSize])
 
+  // the MAIN useEffect - probably need to chop it up/refactor yeah yeah 
   useEffect(() => {
 
     const stones = gameToDisplay.boardConfig.stones
@@ -92,15 +100,15 @@ const GPU = (props) => {
     stonesRef.current = stones
 
     if (canvasRef.current && !canvasInitialized) {
+
       const canvas = canvasRef.current;
 
-      //console.log('zzzzzzzzzz',canvas)
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha:true });
 
       renderer.setSize(window.innerWidth, window.innerHeight / heightMult);
       renderer.setClearColor("white", 0);
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap; //PCFSoftShadowMap
 
       canvas.appendChild(renderer.domElement);
 
@@ -110,16 +118,7 @@ const GPU = (props) => {
       const far = 1000;
       const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-      if (playerNumRef.current === 1 ) {
-        camera.position.set(0,-3.5,4.5)
-        camera.lookAt(0,0,0)
-      }
-      else {
-        camera.position.set(0,3.5,4.5)
-        camera.lookAt(0,0,0)
-        camera.rotateZ(Math.PI)
-      }
-
+      //OrbitControls were not playing nicely with how I actually wanted to set the camera positions
       //const controls = new OrbitControls(camera, canvas);
       //controls.target.set(0, 0, 0);
       //controls.update();
@@ -127,40 +126,25 @@ const GPU = (props) => {
       const scene = new THREE.Scene();
 
       const color = 0xffffff;
-      const intensity = .4;
+      const intensity = 1.4;
       const light2 = new THREE.PointLight(color, intensity);
+      setShadow(light2)
       scene.add(camera);
-
       //super cool - light source now emanates from camera!
       camera.add(light2);
 
-      const light3 = new THREE.DirectionalLight(0xFFA0A0, .8)
-      light3.position.set(1,3,5)
+      const light3 = new THREE.DirectionalLight(0xFFFF00, .5)
+      setShadow(light3)
       scene.add(light3)
 
-      const light4 = new THREE.DirectionalLight(0xFFA0A0, .8)
-      light4.position.set(1,-3,5)
+      const light4 = new THREE.DirectionalLight(0xFFFF00, .5)
+      setShadow(light4)
       scene.add(light4)
 
-      //Create a DirectionalLight and turn on shadows for the light
-      const light = new THREE.DirectionalLight(0xf0f0ff, 1);
-      light.position.set(0, 0, 5); //default; light shining from top
-      light.castShadow = true; 
+      const light = new THREE.DirectionalLight(0x00FFFF, 1.2);
+      light.position.set(0, 0, 1); 
+      setShadow(light)
       scene.add(light);
-
-      //Set up shadow properties for the light
-      light.shadow.mapSize.width = 1024; // default
-      light.shadow.mapSize.height = 1024; // default
-      light.shadow.camera.near = 0.1; // default
-      light.shadow.camera.far = 1000; // default
-
-      //have to set the range of the orthographic shadow camera
-      //to cover the whole plane we are casting shadows onto
-      //defaults are -5 to 5
-      light.shadow.camera.left = -20;
-      light.shadow.camera.bottom = -20;
-      light.shadow.camera.right = 20;
-      light.shadow.camera.top = 20; 
 
       const planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
       const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x003010, shininess:40 });
@@ -169,6 +153,7 @@ const GPU = (props) => {
       plane.receiveShadow = true;
       scene.add(plane);
 
+      const d20 = new THREE.IcosahedronGeometry(.2); 
       const geometry = new THREE.IcosahedronGeometry(.2);    
       //transparent d12 which is our floating "bin"
       const geoBin = new THREE.DodecahedronGeometry(.8)
@@ -177,12 +162,12 @@ const GPU = (props) => {
       //THREE.SphereGeometry(.8,32,16)
 
       const transparentMaterial = new THREE.MeshPhongMaterial(
-        { color: "rgb(255,100,255)", opacity: .25, transparent:true }
+        { color: "rgb(100,50,200)", opacity: .5, transparent:true, shininess:1000 }
       )
 
       const geoBase = new THREE.IcosahedronGeometry(1.2)
       const homeBaseMaterial = new THREE.MeshPhongMaterial(
-        { color: "rgb(60,40,100)", opacity: .4, transparent:true }
+        { color: "rgb(60,40,100)", opacity: .8, transparent:true }
         //{ color: 0xF000FF, wireframe:true }
       )
 
@@ -215,7 +200,7 @@ const GPU = (props) => {
 
         if (geoType == "regularBin") {
           for (let i = 0; i < d12Vertices.length; i++) {
-            const cube = new THREE.Mesh(geometry, materials[playerNum]);
+            const cube = new THREE.Mesh(d20, materials[playerNum]);
             //cube.material.color.setHex(color);
             const [x2, y2, z2] = d12Vertices[i];
             cube.position.set(x2, y2, z2).multiplyScalar(0.2);
@@ -225,17 +210,35 @@ const GPU = (props) => {
             d4Group.add(cube);
           }
           const sphere = new THREE.Mesh(geoBin,transparentMaterial)
-          sphere.receiveShadow = true
-          //sphere.castShadow = true
           d4Group.add(sphere)
 
         } else if (geoType == "homeBase") {
-          //const cube = new THREE.Mesh(geometry, material);
-          //cube.material.color.setHex(color);
-          //cube.position.set(0, 0, 0);
-          //cube.rotateZ(1.5)
+
+          for (let i=0; i<d20Vertices.length; i++) {
+            const cube = new THREE.Mesh(d20, materials[playerNum])
+            const [x2,y2,z2] = d20Vertices[i]
+            cube.position.set(x2,y2,z2).multiplyScalar(.6)
+            cube.castShadow=true
+            cube.receiveShadow=true
+            cube.visible = false
+            d4Group.add(cube)
+          }
+          //this is NOT a mistake, making 2 layers to be displayed
+          //going in order from outside to inside
+          for  (let i=0; i<d20Vertices.length; i++) {
+            const cube2 = new THREE.Mesh(d20, materials[playerNum])
+            const [x3,y3,z3] = d20Vertices[i]
+            cube2.position.set(x3,y3,z3).multiplyScalar(.3)
+            cube2.castShadow=true
+            cube2.receiveShadow=true
+            cube2.visible = false
+            d4Group.add(cube2)
+          } 
           const sphere = new THREE.Mesh(geoBase,homeBaseMaterial)
+          sphere.castShadow = true
+          sphere.receiveShadow = true
           d4Group.add(sphere);
+
         }
 
         d4Group.position.set(x + 1, y, z);
@@ -288,7 +291,7 @@ const GPU = (props) => {
               geometry,
               0xf000f0,
               2 * (pos - 3),
-              1.,
+              1.8,
               0,
               String(stones[i]),
               i,
@@ -308,7 +311,7 @@ const GPU = (props) => {
               geometry,
               0xf000f0,
               2 * (pos - 3),
-              -1.,
+              -1.8,
               0,
               String(stones[i]),
               i,
@@ -328,9 +331,10 @@ const GPU = (props) => {
             0xf000f0,
             pos,
             0,
-            -0.15,
+            0,
             -stones[homeBase[0]],
-            homeBase[0]
+            homeBase[0],
+            0
           )
         );
         pos = 2 * 3;
@@ -341,9 +345,10 @@ const GPU = (props) => {
             0xf000f0,
             pos,
             0,
-            -0.15,
+            0,
             -stones[homeBase[1]],
-            homeBase[1]
+            homeBase[1],
+            1
           )
         );
 
@@ -353,7 +358,7 @@ const GPU = (props) => {
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
 
-      setGL({ renderer, camera, scene, cubes });
+      setGL({ renderer, camera, scene, cubes, light2, light3, light4 });
       setCanvasInitialized(true);
     }
 
@@ -368,15 +373,15 @@ const GPU = (props) => {
 
     if ( canvasInitialized) {
 
-      const {renderer,camera,scene,cubes} = GL
+      const {renderer,camera,scene,cubes,light2, light3,light4} = GL
 
       if (playerNumRef.current === 1 ) {
         camera.position.set(0,-3.5,4.5)
-        camera.lookAt(0,0,0)
+        camera.lookAt(0,-1,.5)
       }
       else {
         camera.position.set(0,3.5,4.5)
-        camera.lookAt(0,0,0)
+        camera.lookAt(0,1,.5)
         camera.rotateZ(Math.PI)
       }
 
@@ -410,61 +415,76 @@ const GPU = (props) => {
 
         count ++
         time *= 0.001;
+
+        //move the lights so the shadows move - why? because that's why
+        const [dx,dy] = [7*Math.cos(time/2), 5*Math.sin(time/3)]
+        light3.position.set(2+dx,3+dy,5)
+        light4.position.set(-2-dx,-3-dy,5)
+
+        light2.intensity = Math.max(1.5,.8 + Math.sin(time))
+
         prevRenderTime = currentRenderTime - (elapsed%fpsInterval)
 
         cubes.forEach((cubeInfo, idx) => {
+          const { cube, elem } = cubeInfo;
+          const binNum = elem;
 
-          const {cube, elem} = cubeInfo;
-          const  binNum  = elem
-
-          if (  !(binNum === homeBase[0] || binNum === homeBase[1]) ) {
-            const speed = Math.min(8,stonesRef.current[binNum])*.5
+          if (!(binNum === homeBase[0] || binNum === homeBase[1])) {
+            const speed = Math.min(8, stonesRef.current[binNum]) * 0.5;
             const rot = time * speed;
             cube.rotation.x = rot + idx;
-            cube.rotation.y = stonesRef.current[binNum]===0 ? 0 : time*idx*.1;
+            cube.rotation.y =
+              stonesRef.current[binNum] === 0 ? 0 : time * idx * 0.1;
             //cube.rotation.z = rot/2;
-                
-            //the enclosing  spehere is the last child - so
-            //always keep it visible
-            const maxStones = cube.children.length-1
-            const cappedActualStones = Math.min(maxStones,stonesRef.current[binNum])
-            for (let i=0; i<cappedActualStones; i++) {
-              cube.children[i].visible = true
-            }
-            for (let i=cappedActualStones; i<maxStones; i++) {
-              cube.children[i].visible = false
-            }
+          } else {
+            cube.rotation.y =
+              0.1 * time * Math.min(25, stonesRef.current[binNum]);
           }
-          else {
-            cube.rotation.y = .2 * time * Math.min(25,stonesRef.current[binNum])
+
+          //the enclosing cage is the last child - so
+          //always keep it visible by ignoring it here
+          const maxStones = cube.children.length - 1;
+
+          const cappedActualStones = Math.min(
+            maxStones,
+            stonesRef.current[binNum]
+          );
+          for (let i = 0; i < cappedActualStones; i++) {
+            cube.children[i].visible = true;
+          }
+          for (let i = cappedActualStones; i < maxStones; i++) {
+            cube.children[i].visible = false;
           }
 
           // get the position of the center of the cube
           cube.updateWorldMatrix(true, false);
           cube.getWorldPosition(tempV);
-    
+
           // get the normalized screen coordinate of that position
           // x and y will be in the -1 to +1 range with x = -1 being
           // on the left and y = -1 being on the bottom
           tempV.project(camera);
-   
+
           // convert the normalized position to CSS coordinates
           // -1,1 to 0,num pixels
-          const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
-          const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
-    
+          const x = (tempV.x * 0.5 + 0.5) * canvas.clientWidth;
+          const y = (tempV.y * -0.5 + 0.5) * canvas.clientHeight;
+
           //the key to getting the updated version of stones is to use
           //stonesRef which is maintained by useRef()!!!
           //can't escape the React life cycle - just accept it
-          const labelRef = labelRefs[binNum]
+          const labelRef = labelRefs[binNum];
           if (labelRef.current) {
-            const sign = (binNum===homeBase[0]||binNum===homeBase[1])?-1:1
-            labelRef.current.textContent = String(sign*stonesRef.current[binNum])
+            const sign =
+              binNum === homeBase[0] || binNum === homeBase[1] ? -1 : 1;
+            labelRef.current.textContent = String(
+              sign * stonesRef.current[binNum]
+            );
             //numbers are a little choppy put in some smoothing
             labelRef.current.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
-            labelRef.current.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
+            labelRef.current.style.zIndex =
+              ((-tempV.z * 0.5 + 0.5) * 100000) | 0;
           }
-
         });
 
         renderer.render(scene, camera);
