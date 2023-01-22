@@ -6,6 +6,9 @@ import Play, {boardConfig} from "../activeGame/Play"
 
 let renderCount = 0
 
+//currently a third player can Request Game and get a Cancel Game button for 
+//a game that the requested player is playing and he can cancel it!!!#%$%!$
+
 const Players = (props) => {
 
   //console.log("rendering Players",renderCount)
