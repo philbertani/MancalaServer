@@ -7,6 +7,7 @@ import { d12Vertices, d20Vertices } from "./geometry"
 //let cubes = []
 //let isRendering = false
 let count = 0  //useRef() replaces all this kind of stuff
+const heightMult = .62
 
 function setShadow(light) {
   light.castShadow = true;
@@ -51,7 +52,7 @@ const GPU = (props) => {
     labelRefs.push(labelRef)
   }
 
-  const heightMult = 1.85
+
 
   //to access the LATEST values of variables in functions defined within Components
   //we need to access a reference!!!  - don't fight the system
@@ -60,8 +61,8 @@ const GPU = (props) => {
   const isRendering = useRef(false)
   const playerNumRef = useRef()
   const playerDataRef = useRef()
-  const gameToDisplayRef = useRef()
   const myTurnRef = useRef()
+  const gameToDisplayRef = useRef()
 
   playerNumRef.current = playerNum
   playerDataRef.current = playerData
@@ -86,7 +87,7 @@ const GPU = (props) => {
     //GL is just references which control state via three.js so we don't want to use setGL here
     const {renderer,camera} = GL  
     if ( renderer) {
-      renderer.setSize(window.innerWidth,window.innerHeight/heightMult)
+      renderer.setSize(window.innerWidth,window.innerHeight*heightMult)
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
@@ -105,13 +106,13 @@ const GPU = (props) => {
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha:true });
 
-      renderer.setSize(window.innerWidth, window.innerHeight / heightMult);
+      renderer.setSize(window.innerWidth, window.innerHeight * heightMult);
       renderer.setClearColor("white", 0);
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
       //all of the tonemappings just dull the colors - at least in this case
-      //renderer.toneMapping = THREE.ACESFilmicToneMapping //THREE.CineonToneMapping //THREE.ReinhardToneMapping //THREE.ACESFilmicToneMapping
+      //renderer.toneMapping = THREE.ACESFilmicToneMapping //THREE.CineonToneMapping //THREE.ReinhardToneMapping
       //renderer.toneMappingExposure = 2
 
       canvas.appendChild(renderer.domElement);

@@ -1,7 +1,9 @@
 body {
   font-family: sans-serif;
   margin:0;
-  background: linear-gradient(white,blue)
+  background: linear-gradient(white,blue);
+  width: 100vw; height:100vh;
+  overflow: hidden;
 }
 
 a {
@@ -20,6 +22,12 @@ nav a {
 form div {
   margin: 1em;
   display: inline-block;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start
 }
 
 .gameBoard {
@@ -46,13 +54,6 @@ form div {
   height: 100%;
   display: block;
   z-Index:-1e7;
-}
-
-#GPUcontainerx {
-  position: relative;  /* makes this the origin of its children */
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
 }
 
 #GPUcontainer {
@@ -96,3 +97,10 @@ form div {
 }
 
 .zeroMargin {margin:0}
+
+#players {
+  position:fixed;
+  margin-left: 2vw;
+  left:0vw; top:80px; width:20vw; max-height:60vh; overflow:auto;
+  font-size: 15px; z-Index:200;
+}

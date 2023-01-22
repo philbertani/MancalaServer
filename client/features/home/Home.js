@@ -6,7 +6,8 @@ const Home = (props) => {
   const username = useSelector((state) => state.auth.me.username);
 
   return ( [
-    <div key='PlayersDiv'>
+
+    <div style={{position:"fixed",left:"85vw",marginRight:"3vw"}} key='PlayersDiv'>
       <h3>Welcome, {username}</h3>
     </div>,
 

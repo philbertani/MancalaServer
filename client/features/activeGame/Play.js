@@ -18,7 +18,7 @@ const nextBin = [
   [-1, 8, 1, 2, 3, 4, 5,  6, 9, 10, 11, 12, 13, 7]  //P1 skips hb0
 ]
 
-const initStonesPerBin = 4
+const initStonesPerBin = 2
 let initialStones = Array(14).fill(initStonesPerBin);
 initialStones[0] = 0;
 initialStones[7] = 0;
@@ -180,10 +180,17 @@ const Play = (props) => {
           }
   
           const {gameState, winnerInfo} = gameToDisplay
+
+          if ( winnerInfo.winnerName ) {
+            newGameBoard.push(
+              <div style={{ position:"absolute", left:"50%",transform:"translate(-50%,0)",
+                top:"28vh",wordBreak:"break-all",fontSize:"2em" }} key="winnerDiv">
+                {gameState} {JSON.stringify(winnerInfo)}
+              </div> 
+            )
+          }
+
           newGameBoard.push([
-            <div style={{ position: "relative", top: "0%" }} key="winnerDiv">
-              {gameState} {JSON.stringify(winnerInfo)}{" "}
-            </div>,
             <div
               ref={gameBoardRef}
               onClick={
@@ -250,11 +257,15 @@ const Play = (props) => {
   //this was right before GPUdiv
   //<div key="labelsDiv" id="labels" ref={labelsRef} ></div>,
   return [
-    <div key="right" id="right">
-      <div key="gameDiv">{gameOutput}</div>
 
+    <div key="gameContainer" id="gameContainer">
 
-      <div key="GPUdiv">
+      <div key="gameContainer">{gameBoard}</div>
+
+      <div style={{position:"absolute",left:"50%",transform:"translate(-50%,0)",fontSize:"1.5em"}} 
+        key="gameDiv">{gameOutput}</div>
+
+      <div key="GPUdiv" style={{position:"absolute",top:"37vh"}}>
         {gameForGPU.boardConfig && [
           <GPU
             key="GPU"
@@ -270,7 +281,6 @@ const Play = (props) => {
         ]}
       </div>
 
-      <div key="gameContainer">{gameBoard}</div>
     </div>
   ];
 

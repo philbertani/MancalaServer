@@ -47,6 +47,7 @@ const Players = (props) => {
 
   const dispatchDenyGame = (ev,playerName) => {
    
+    //this handles: Cancel Request and Cancel Game
     setRequested("") 
 
     dispatch(cancelRequest(playerName))
@@ -179,17 +180,14 @@ const Players = (props) => {
     );   
 
     return [
-      <div key="left" id="left">
-        <div key="playerList">{playersOutput}</div>
-
-        <div key="gameRequests">
-          {gameRequestOutput}
+      <div key="MainScreen">
+        <div id="players" key="players">
+          <div key="playerList">{playersOutput}</div>
+          <div key="gameRequests">{gameRequestOutput}</div>
         </div>
 
-        <div key="activeGame">
-          {activeGameOutput}
-        </div>
-      </div>,
+        <div key="activeGame">{activeGameOutput}</div>
+      </div>
     ];
   }
 };

@@ -231,6 +231,11 @@ router.put("/cancelRequest", async (req, res, next) => {
     const {playerName} = req.body
     const opponentName = players[playerName].opponent
 
+    if ( players[playerName].activeGame) {
+      console.log('zzzzzzzzzzzzz cancelling a game')
+      players[playerName].activeGame.gameState = "Cancelled"
+    }
+
     if ( playerName) players[playerName] = {}
     if ( opponentName ) players[opponentName] = {}
     

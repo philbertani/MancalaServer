@@ -15,12 +15,13 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  return (
-    <div>
-      <h3 className="zeroMargin">Mancala Player Center</h3>
+  return ( [
+    <div key="navContainer" style={{position:"fixed",zIndex:"200"}}>
+    <div className="flexRow" >
+      <h3 style={{marginLeft:"2vw"}}>Mancala Player Center</h3>
       <nav>
         {isLoggedIn ? (
-          <div className="zeroMargin">
+          <div>
             {/* The navbar will show these links after you log in */}
             <Link to="/home">Home</Link>
             <button type="button" onClick={logoutAndRedirectHome}>
@@ -28,16 +29,17 @@ const Navbar = () => {
             </button>
           </div>
         ) : (
-          <div>
+          <div >
             {/* The navbar will show these links before you log in */}
             <Link to="/login">Login</Link>
             <Link to="/signup">Sign Up</Link>
           </div>
         )}
       </nav>
-      <hr />
     </div>
-  );
+    <hr />   
+    </div> 
+  ]);
 };
 
 export default Navbar;

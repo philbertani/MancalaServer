@@ -25,7 +25,7 @@ const AuthForm = ({ name, displayName }) => {
   const handleSubmit = evt => {} */
 
   return (
-    <div>
+    <div style={{float:"right",marginRight:"5vw"}}>
       <form onSubmit={handleSubmit} name={name}>
         <div>
           <label htmlFor="username">
