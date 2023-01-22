@@ -108,7 +108,11 @@ const GPU = (props) => {
       renderer.setSize(window.innerWidth, window.innerHeight / heightMult);
       renderer.setClearColor("white", 0);
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap; //PCFSoftShadowMap
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+      //all of the tonemappings just dull the colors - at least in this case
+      //renderer.toneMapping = THREE.ACESFilmicToneMapping //THREE.CineonToneMapping //THREE.ReinhardToneMapping //THREE.ACESFilmicToneMapping
+      //renderer.toneMappingExposure = 2
 
       canvas.appendChild(renderer.domElement);
 
@@ -162,10 +166,10 @@ const GPU = (props) => {
       //THREE.SphereGeometry(.8,32,16)
 
       const transparentMaterial = new THREE.MeshPhongMaterial(
-        { color: "rgb(100,50,200)", opacity: .5, transparent:true, shininess:1000 }
+        { color: "rgb(60,40,150)", opacity: .5, transparent:true, shininess:800 }
       )
 
-      const geoBase = new THREE.IcosahedronGeometry(1.2)
+      const geoBase = new THREE.IcosahedronGeometry(1.1)
       const homeBaseMaterial = new THREE.MeshPhongMaterial(
         { color: "rgb(60,40,100)", opacity: .8, transparent:true }
         //{ color: 0xF000FF, wireframe:true }
@@ -182,8 +186,8 @@ const GPU = (props) => {
         new THREE.MeshPhongMaterial({shininess:1000}),
         new THREE.MeshPhongMaterial({shininess:1000}),
       ];
-      materials[0].color.setRGB(.5, 0, 0.25);
-      materials[1].color.setRGB(0.25, 0, .5);
+      materials[0].color.setRGB(.55, 0, 0.4);
+      materials[1].color.setRGB(0.3, 0, .55);
 
       function makeD4Instance(
         geoType,
@@ -217,7 +221,7 @@ const GPU = (props) => {
           for (let i=0; i<d20Vertices.length; i++) {
             const cube = new THREE.Mesh(d20, materials[playerNum])
             const [x2,y2,z2] = d20Vertices[i]
-            cube.position.set(x2,y2,z2).multiplyScalar(.6)
+            cube.position.set(x2,y2,z2).multiplyScalar(.54)
             cube.castShadow=true
             cube.receiveShadow=true
             cube.visible = false
@@ -228,7 +232,7 @@ const GPU = (props) => {
           for  (let i=0; i<d20Vertices.length; i++) {
             const cube2 = new THREE.Mesh(d20, materials[playerNum])
             const [x3,y3,z3] = d20Vertices[i]
-            cube2.position.set(x3,y3,z3).multiplyScalar(.3)
+            cube2.position.set(x3,y3,z3).multiplyScalar(.2)
             cube2.castShadow=true
             cube2.receiveShadow=true
             cube2.visible = false
