@@ -7,6 +7,11 @@ import { executeTurn, endGame } from "../players/playersSlice";
 
 let renderCount = 0
 
+const initStonesPerBin = 1
+let initialStones = Array(14).fill(initStonesPerBin);
+initialStones[0] = 0;
+initialStones[7] = 0;
+
 //P0, P1  are Player0 and Player1
 //Player 0 is on the Top Row and moves Left with HomeBase0 (bin0)
 //Player 1 is on the Bottom Row and movers Right with HomeBase1 (bin7)
@@ -17,11 +22,6 @@ const nextBin = [
   [ 8, 0, 1, 2, 3, 4, 5, -1, 9, 10, 11, 12, 13, 6], //P0 skips hb1
   [-1, 8, 1, 2, 3, 4, 5,  6, 9, 10, 11, 12, 13, 7]  //P1 skips hb0
 ]
-
-const initStonesPerBin = 1
-let initialStones = Array(14).fill(initStonesPerBin);
-initialStones[0] = 0;
-initialStones[7] = 0;
 
 const playerBins = [
   //giving the [min,max] inclusive
@@ -66,6 +66,7 @@ const Play = (props) => {
 
     let newGameOutput = []
     let newGameBoard = []
+
     if ( playerName && loggedInPlayers.hasOwnProperty(playerName)) {
   
       //we would like the board to show the previous game until new one is
@@ -85,7 +86,8 @@ const Play = (props) => {
             setGPUplayerNum(playerNum)
             setMyTurn(loggedInPlayers[playerName].myTurn)
 
-            if (loggedInPlayers[playerName].myTurn) {
+            if ( activeGame.winnerInfo.winnerName ) { }  //do something??
+            else if (loggedInPlayers[playerName].myTurn) {
               newGameOutput.push(<p key="yourTurn">Your Turn, Player {playerNum} </p>)
             } else {
               newGameOutput.push(
@@ -182,9 +184,10 @@ const Play = (props) => {
           const {gameState, winnerInfo} = gameToDisplay
 
           if ( winnerInfo.winnerName ) {
+            setGameOutput("")  //blank out the Your Turn messages
             newGameBoard.push(
               <div style={{ position:"absolute", left:"50%",transform:"translate(-50%,0)",
-                top:"28vh",wordBreak:"break-all",fontSize:"1.7em" }} key="winnerDiv">
+                top:"25vh",wordBreak:"break-all",fontSize:"1.7em" }} key="winnerDiv">
                 {gameState} {JSON.stringify(winnerInfo)}
               </div> 
             )
