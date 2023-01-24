@@ -7,7 +7,7 @@ import { executeTurn, endGame } from "../players/playersSlice";
 
 let renderCount = 0
 
-const initStonesPerBin = 1
+const initStonesPerBin = 3
 let initialStones = Array(14).fill(initStonesPerBin);
 initialStones[0] = 0;
 initialStones[7] = 0;

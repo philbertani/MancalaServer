@@ -4,8 +4,9 @@
   "description": "maybe multiplayer mancala game server",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode=production",
+    "build": "webpack",
     "build:dev": "npm run build -- --watch --mode=development",
+    "build:prod": "npm run build -- --watch --mode=production",
     "seed": "node script/seed.js",
     "start": "node server",
     "start:dev": "npm run build:dev & npm run start-server",
@@ -18,7 +19,7 @@
     "test:dev:models": "npm run test:dev -- --grep=model",
     "test:dev:routes": "npm run test:dev -- --grep=route",
     "seed:render": "DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala node script/seed.js",
-    "start:render": "npm run build & npm run start-server-render",
+    "start:render": "npm run build:prod & npm run start-server-render",
     "start-server-render": "DATABASE_URL=postgres://play:vUnTBCRyYR7kW5FMVc8nW1gts0cqeTzx@dpg-cf5lalla499d72s5g9bg-a/mancala JWT=shh3 SEED=true nodemon server -e html,js,scss --ignore public --ignore client"
   },
   "author": "Fullstack Academy of Code",
